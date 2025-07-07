@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import AppHeader from '../components/AppHeader.vue';
-import Consume from '../components/Consume.vue';
 import HuntInfo from '../components/HuntInfo.vue';
 import Preset from '../components/Preset.vue';
 import Timer from '../components/Timer.vue';
+import Consume from '../components/Consume.vue'
 </script>
 
 <template>
