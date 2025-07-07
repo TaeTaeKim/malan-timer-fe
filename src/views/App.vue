@@ -46,6 +46,8 @@ import Consume from '../components/Consume.vue'
 
 .hunt-start,
 .hunt-end {
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
   width: 50%;
   background-color: #343741;
   border-radius: 8px;

@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { hpItems, mpItems, buffItems, etcItems, type Item } from '../data/items';
+import { useConsumeStore } from '../stores/consume';
 
+
+const consumeStore = useConsumeStore()
 const showModal = ref<boolean>(false);
 const search = ref('');
 const tabs = ['hp', 'mp', 'buff', 'etc'];
@@ -18,21 +21,16 @@ const filteredItems = computed(() => {
     return itemList[selectedTab.value as keyof typeof itemList] || [];
 });
 
-interface SelectedItem extends Item {
-    count: number;
-    price: number;
-}
-
-const selectedItems = ref<SelectedItem[]>([])
+const selectedItems = computed(() => consumeStore.selectedItems)
 
 function addItem(item: Item) {
     if (!selectedItems.value.find(i => i.id === item.id)) {
-        selectedItems.value.push({ ...item, count: 1, price: item.price });
+        consumeStore.addItem(item)
     }
 }
 
 function deleteSelectedItem(id: number) {
-    selectedItems.value = selectedItems.value.filter(item => item.id !== id);
+    consumeStore.deleteSelectedItem(id)
 }
 
 </script>
@@ -41,13 +39,15 @@ function deleteSelectedItem(id: number) {
         <h2 class="consume-title">소비 아이템 설정</h2>
         <div class="consume-list">
             <div v-for="item in selectedItems" :key="item.id" class="consume-list-item">
-                <img :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon`" style="margin-right: 5px;">
-                <p style="width: 30%;">{{ item.name }}</p>
-                <label style="margin-left: 3px; font-weight: 400; width: 30%;">
-                    가격:
-                    <input type="number" v-model.number="item.price" min="0" style="width: 50%;margin-left: 1px;">
-                </label>
-                <button @click="deleteSelectedItem(item.id)">삭제</button>
+                <div class="item-info">
+                    <img :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon`" style="margin-right: 10px;">
+                    <p style="width:140px">{{ item.name }}</p>
+                    <label style="margin-left: 3px; font-weight: 400; width: 30%;">
+                        가격:
+                        <input type="number" v-model.number="item.price" min="0" style="width: 50%;margin-left: 1px;">
+                    </label>
+                    <button @click="deleteSelectedItem(item.id)">×</button>
+                </div>
             </div>
 
         </div>
@@ -97,7 +97,7 @@ function deleteSelectedItem(id: number) {
 
 .consume-list {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     height: 140px;
     margin-bottom: 5px;
     column-gap: 20px;
@@ -110,6 +110,13 @@ function deleteSelectedItem(id: number) {
     justify-content: space-between;
     font-weight: 800;
     height: 35px;
+}
+
+.item-info {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    width: 100%;
 }
 
 .consume-title {

@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import { useConsumeStore } from '../stores/consume';
 const imageUrl = ref<string | null>(null)
+const consumeStore = useConsumeStore()
 
+const selectedItems = computed(() => consumeStore.selectedItems)
 function onFileChange(event: Event) {
     const files = (event.target as HTMLInputElement).files
     if (files && files[0]) {
@@ -29,12 +32,16 @@ function onPaste(event: ClipboardEvent) {
         }
     }
 }
+function deleteSelectedItem(id: number) {
+    consumeStore.deleteSelectedItem(id)
+}
 </script>
 
 <template>
     <div class="image-dropbox" @drop="onDrop" @dragover.prevent @paste="onPaste" tabindex="0">
         <input type="file" accept="image/*" @change="onFileChange" />
-        <p>이미지 드래그 또는 영역 클릭 후 붙여넣기(Ctrl+V).</p>
+        <p style="margin: 0;">메랜 게임 스샷을 넣으면 레벨, 경험치, 메소가 자동입력됩니다.</p>
+        <p style="margin: 0;">드래그, 영역 클릭 후 붙여넣기(Ctrl+V)</p>
     </div>
     <div class="hunt-info">
         <div class="level-exp-meso">
@@ -53,13 +60,21 @@ function onPaste(event: ClipboardEvent) {
         </div>
     </div>
 
+    <div class="hunt-consume">
+        <h3>소비템 개수</h3>
+        <div v-for="item in selectedItems" :key="item.id" class="hunt-consume-item">
+            <img :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon`" style="margin-right: 5px;">
+            <p style="width: 30%;">{{ item.name }}</p>
+            <label style="margin-left: 3px; font-weight: 400; width: 30%;">
+                개수:
+                <input type="number" min="0" style="width: 50%;margin-left: 1px;">
+            </label>
+            <button @click="deleteSelectedItem(item.id)">×</button>
+        </div>
+    </div>
+
 </template>
 <style scoped>
-.hunt-info {
-    padding: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-}
-
 .image-dropbox {
     display: flex;
     flex-direction: column;
@@ -115,5 +130,13 @@ function onPaste(event: ClipboardEvent) {
 .level-title,
 .exp-title {
     font-weight: 900;
+}
+
+.hunt-consume-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 800;
+    height: 35px;
 }
 </style>
