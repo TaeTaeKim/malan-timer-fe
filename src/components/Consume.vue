@@ -1,36 +1,54 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { hpItems, mpItems, buffItems, etcItems, type Item } from '../data/items';
 
 const showModal = ref<boolean>(false);
 const search = ref('');
-const tabs = ['hp', 'mp', '버프', '기타'];
+const tabs = ['hp', 'mp', 'buff', 'etc'];
 const selectedTab = ref<string>(tabs[0]);
 
-// Example items, replace with your actual data
-interface Item {
-    name: string;
-    type: string;
+const itemList = {
+    hp: hpItems,
+    mp: mpItems,
+    buff: buffItems,
+    etc: etcItems
 }
-const items = ref<Item[]>([
-    { name: 'HP 포션', type: 'hp' },
-    { name: 'MP 포션', type: 'mp' },
-    { name: '버프', type: '버프' },
-    { name: '기타', type: '기타' },
-    { name: '슈퍼 HP 포션', type: 'hp' },
-    { name: '슈퍼 MP 포션', type: 'mp' },
-]);
 
 const filteredItems = computed(() => {
-    return items.value.filter(item =>
-        item.type === selectedTab.value &&
-        item.name.toLowerCase().includes(search.value.toLowerCase())
-    );
+    return itemList[selectedTab.value as keyof typeof itemList] || [];
 });
+
+interface SelectedItem extends Item {
+    count: number;
+    price: number;
+}
+
+const selectedItems = ref<SelectedItem[]>([])
+
+function addItem(item: Item) {
+    if (!selectedItems.value.find(i => i.id === item.id)) {
+        selectedItems.value.push({ ...item, count: 1, price: item.price });
+    }
+}
+
+function deleteSelectedItem(id: number) {
+    selectedItems.value = selectedItems.value.filter(item => item.id !== id);
+}
+
 </script>
 <template>
     <div class="consume-section">
         <h2 class="consume-title">소비 아이템 설정</h2>
         <div class="consume-list">
+            <div v-for="item in selectedItems" :key="item.id" class="consume-list-item">
+                <img :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon`" style="margin-right: 5px;">
+                <p style="width: 30%;">{{ item.name }}</p>
+                <label style="margin-left: 3px; font-weight: 400; width: 30%;">
+                    가격:
+                    <input type="number" v-model.number="item.price" min="0" style="width: 50%;margin-left: 1px;">
+                </label>
+                <button @click="deleteSelectedItem(item.id)">삭제</button>
+            </div>
 
         </div>
         <div class="consume-section-botton">
@@ -39,7 +57,7 @@ const filteredItems = computed(() => {
         </div>
     </div>
 
-    <div v-if="showModal" class="modal-overlay">
+    <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
         <div class="modal-container">
             <div class="modal-header">
                 <input v-model="search" class="potion-search" placeholder="소비템 검색">
@@ -49,7 +67,8 @@ const filteredItems = computed(() => {
                     @click="selectedTab = tab">{{ tab }}</button>
             </div>
             <div class="modal-list">
-                <div v-for="item in filteredItems" :key="item.name" class="modal-list-item">
+                <div v-for="item in filteredItems" :key="item.name" class="modal-list-item" @click="addItem(item)">
+                    <img :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon`">
                     {{ item.name }}
                 </div>
             </div>
@@ -77,8 +96,20 @@ const filteredItems = computed(() => {
 }
 
 .consume-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     height: 140px;
     margin-bottom: 5px;
+    column-gap: 20px;
+    overflow-y: auto;
+}
+
+.consume-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 800;
+    height: 35px;
 }
 
 .consume-title {
@@ -172,6 +203,8 @@ const filteredItems = computed(() => {
     background: #2a2b31;
     border-radius: 6px;
     margin-bottom: 16px;
+    max-height: 600px;
+    overflow-y: auto;
 }
 
 .modal-list-item {
@@ -182,6 +215,10 @@ const filteredItems = computed(() => {
     color: #fff;
     cursor: pointer;
     transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-weight: 800;
 }
 
 .modal-list-item:hover {
