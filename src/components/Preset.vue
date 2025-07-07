@@ -7,7 +7,7 @@ const activeTab: Ref<'preset' | 'history'> = ref('preset')
     <div class="preset-container">
         <div class="tabs">
             <button :class="['tab-button', { active: activeTab === 'preset' }]" @click="activeTab = 'preset'">
-                물약 프리셋
+                소비 프리셋
             </button>
             <button :class="['tab-button', { active: activeTab === 'history' }]" @click="activeTab = 'history'">
                 사냥 히스토리
