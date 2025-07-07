@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppHeader from '../components/AppHeader.vue';
+import Consume from '../components/Consume.vue';
 import HuntInfo from '../components/HuntInfo.vue';
 import Preset from '../components/Preset.vue';
 import Timer from '../components/Timer.vue';
@@ -10,6 +11,9 @@ import Timer from '../components/Timer.vue';
   <div class="timer-preset-container">
     <Timer />
     <Preset />
+  </div>
+  <div class="consume-container">
+    <Consume />
   </div>
   <div class="hunt-info-container">
     <div class="hunt-start">
@@ -26,8 +30,8 @@ import Timer from '../components/Timer.vue';
 <style scoped>
 .timer-preset-container {
   margin-top: 20px;
-  height: 400px;
   display: flex;
+  margin-bottom: 20px;
 }
 
 .hunt-info-container {
@@ -43,7 +47,7 @@ import Timer from '../components/Timer.vue';
 .hunt-start,
 .hunt-end {
   width: 50%;
-  background-color: #454956;
+  background-color: #343741;
   border-radius: 8px;
   min-height: 400px;
 }
