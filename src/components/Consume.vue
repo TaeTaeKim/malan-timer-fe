@@ -40,7 +40,8 @@ function deleteSelectedItem(id: number) {
         <div class="consume-list">
             <div v-for="item in selectedItems" :key="item.id" class="consume-list-item">
                 <div class="item-info">
-                    <img :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon`" style="margin-right: 10px;">
+                    <img :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon?`"
+                        style="margin-right: 10px; width: 30px;">
                     <p style="width:140px">{{ item.name }}</p>
                     <label style="margin-left: 3px; font-weight: 400; width: 30%;">
                         가격:
@@ -115,6 +116,7 @@ function deleteSelectedItem(id: number) {
 .item-info {
     display: flex;
     align-items: center;
+    gap: 5px;
     height: 100%;
     width: 100%;
 }

@@ -4,6 +4,7 @@ import HuntInfo from '../components/HuntInfo.vue';
 import Preset from '../components/Preset.vue';
 import Timer from '../components/Timer.vue';
 import Consume from '../components/Consume.vue'
+import HuntResult from '../components/HuntResult.vue';
 </script>
 
 <template>
@@ -24,6 +25,9 @@ import Consume from '../components/Consume.vue'
       <h2 class="hunt-title">사냥 후</h2>
       <HuntInfo />
     </div>
+  </div>
+  <div class="hunt-result">
+    <HuntResult />
   </div>
 </template>
 

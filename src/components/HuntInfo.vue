@@ -61,9 +61,10 @@ function deleteSelectedItem(id: number) {
     </div>
 
     <div class="hunt-consume">
-        <h3>소비템 개수</h3>
+        <h3>소비 내역</h3>
         <div v-for="item in selectedItems" :key="item.id" class="hunt-consume-item">
-            <img :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon`" style="margin-right: 5px;">
+            <img :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon`"
+                style="margin-right: 5px; width: 30px;">
             <p style="width: 30%;">{{ item.name }}</p>
             <label style="margin-left: 3px; font-weight: 400; width: 30%;">
                 개수:
@@ -102,7 +103,7 @@ function deleteSelectedItem(id: number) {
 }
 
 .level {
-    width: 15%;
+    width: 20%;
 }
 
 .exp,
@@ -114,7 +115,7 @@ function deleteSelectedItem(id: number) {
 /* level, exp, meso input */
 .level-input {
     margin-left: 5px;
-    width: 80%;
+    width: 100%;
     height: 20px;
 
 }
