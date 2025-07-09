@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { useConsumeStore } from '../stores/consume';
 import { useHuntStore } from '../stores/hunt';
+import axios from 'axios';
 
 const imageUrl = ref<string | null>(null)
 
@@ -39,10 +40,52 @@ function updateHuntInfo(field: keyof typeof huntStore.huntStart, value: number) 
     }
 }
 
+const loading = ref(false);
+
+async function extractInfoFromImage(file: File) {
+    loading.value = true;
+    try {
+        // AI 서버의 /extract 엔드포인트로 요청
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await axios.post('/extract', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+            timeout: 5000,
+        });
+        // 실제 응답 구조에 맞게 extracted_data에서 값 추출
+        const { extracted_data } = response.data;
+        if (!extracted_data) throw new Error('No extracted_data in response');
+        const level = Number(extracted_data.level);
+        const exp = Number(extracted_data.exp);
+        const meso = Number(extracted_data.meso);
+        // Update hunt info depending on type
+        if (props.type === 'start') {
+            huntStore.setHuntStart({
+                ...huntStore.huntStart,
+                level: !isNaN(level) ? level : huntStore.huntStart.level,
+                exp: !isNaN(exp) ? exp : huntStore.huntStart.exp,
+                meso: !isNaN(meso) ? meso : huntStore.huntStart.meso,
+            });
+        } else {
+            huntStore.setHuntEnd({
+                ...huntStore.huntEnd,
+                level: !isNaN(level) ? level : huntStore.huntEnd.level,
+                exp: !isNaN(exp) ? exp : huntStore.huntEnd.exp,
+                meso: !isNaN(meso) ? meso : huntStore.huntEnd.meso,
+            });
+        }
+    } catch (e) {
+        alert('AI 추출에 실패했습니다.');
+    } finally {
+        loading.value = false;
+    }
+}
+
 function onFileChange(event: Event) {
     const files = (event.target as HTMLInputElement).files
     if (files && files[0]) {
         imageUrl.value = URL.createObjectURL(files[0])
+        extractInfoFromImage(files[0]);
     }
 }
 
@@ -50,6 +93,7 @@ function onDrop(event: DragEvent) {
     event.preventDefault()
     if (event.dataTransfer && event.dataTransfer.files.length > 0) {
         imageUrl.value = URL.createObjectURL(event.dataTransfer.files[0])
+        extractInfoFromImage(event.dataTransfer.files[0]);
     }
 }
 
@@ -61,6 +105,7 @@ function onPaste(event: ClipboardEvent) {
                 const file = item.getAsFile()
                 if (file) {
                     imageUrl.value = URL.createObjectURL(file)
+                    extractInfoFromImage(file);
                 }
             }
         }
@@ -73,9 +118,13 @@ function deleteSelectedItem(id: number) {
 
 <template>
     <div class="image-dropbox" @drop="onDrop" @dragover.prevent @paste="onPaste" tabindex="0">
-        <input type="file" accept="image/*" @change="onFileChange" />
-        <p style="margin: 0;">메랜 게임 스샷을 넣으면 레벨, 경험치, 메소가 자동입력됩니다.</p>
-        <p style="margin: 0;">드래그, 영역 클릭 후 붙여넣기(Ctrl+V)</p>
+        <div v-if="!loading">
+            <input type="file" accept="image/*" @change="onFileChange" />
+            <p style="margin: 0;">메랜 게임 스샷을 넣으면 레벨, 경험치, 메소가 자동입력됩니다.</p>
+            <p style="margin: 0;">드래그, 영역 클릭 후 붙여넣기(Ctrl+V)</p>
+        </div>
+        <div v-if="loading"
+            style="color: #2563EB; font-weight: 900; text-align: center; font-size: 40px; margin-top: 5px;">추출중..</div>
     </div>
     <div class="hunt-info">
         <div class="level-exp-meso">
