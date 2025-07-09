@@ -12,6 +12,10 @@ const search = ref('');
 const tabs = ['hp', 'mp', 'buff', 'etc'];
 const selectedTab = ref<string>(tabs[0]);
 
+function closeModal() {
+    showModal.value = false;
+    search.value = '';
+}
 const itemList = {
     hp: hpItems,
     mp: mpItems,
@@ -81,7 +85,7 @@ function isSelectedItem(id: number) {
         </div>
     </div>
 
-    <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
+    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
         <div class="modal-container">
             <div class="modal-header">
                 <input v-model="search" class="potion-search" :placeholder="`${selectedTab} 아이템 검색`"
@@ -98,7 +102,7 @@ function isSelectedItem(id: number) {
                     {{ item.name }}
                 </div>
             </div>
-            <button class="modal-close" @click="showModal = false">닫기</button>
+            <button class="modal-close" @click="closeModal">닫기</button>
 
         </div>
     </div>
