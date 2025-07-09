@@ -93,7 +93,7 @@ function reset(): void {
 </script>
 
 <template>
-  <div class="timer-container">
+  <div class="timer-container default-background">
     <!-- Tabs -->
     <div class="tabs">
       <button :class="['tab-button', { active: activeTab === 'timer' }]" @click="activeTimer">
@@ -135,6 +135,7 @@ function reset(): void {
 <style scoped>
 .timer-container {
   width: 70%;
+  margin-right: 10px;
 }
 
 /* tab 영역 */
@@ -197,7 +198,7 @@ function reset(): void {
 }
 
 .btn-adjust.positive {
-  background-color: #343741;
+  background-color: #131314;
 }
 
 .actions {

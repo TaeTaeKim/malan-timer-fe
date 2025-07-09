@@ -29,18 +29,28 @@ import HuntResult from '../components/HuntResult.vue';
   <div class="hunt-result">
     <HuntResult />
   </div>
+  <footer class="app-footer">
+    <div>
+      <a href="https://open.kakao.com/o/s4fVKDFh" target="_blank" rel="noopener noreferrer" class="openchat-link">
+        💬 카카오톡 문의
+      </a>
+    </div>
+    <div class="copyright">
+      &copy; 2025 메랜 사냥 타이머. All rights reserved.
+    </div>
+  </footer>
 </template>
 
 <style scoped>
 .timer-preset-container {
   margin-top: 20px;
   display: flex;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .hunt-info-container {
   display: flex;
-  gap: 20px;
+  gap: 10px;
 }
 
 .hunt-title {
@@ -56,5 +66,32 @@ import HuntResult from '../components/HuntResult.vue';
   background-color: #343741;
   border-radius: 8px;
   min-height: 400px;
+}
+
+.app-footer {
+  margin-top: 40px;
+  padding: 20px 0 10px 0;
+  text-align: center;
+  color: #888;
+  font-size: 15px;
+  background: none;
+}
+
+.openchat-link {
+  color: #888;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: bolder;
+  margin-bottom: 8px;
+  display: inline-block;
+}
+
+.openchat-link:hover {
+  text-decoration: underline;
+}
+
+.copyright {
+  margin-top: 6px;
+  font-size: 13px;
 }
 </style>

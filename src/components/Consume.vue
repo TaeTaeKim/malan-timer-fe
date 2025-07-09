@@ -27,14 +27,20 @@ const filteredItems = computed(() => {
 
 const selectedItems = computed(() => consumeStore.selectedItems)
 
-function addItem(item: Item) {
-    if (!selectedItems.value.find(i => i.id === item.id)) {
-        consumeStore.addItem(item)
+function selectItem(item: Item) {
+    const found = selectedItems.value.find(i => i.id === item.id);
+    if (found) {
+        consumeStore.deleteSelectedItem(item.id);
+    } else {
+        consumeStore.addItem(item);
     }
 }
 
 function deleteSelectedItem(id: number) {
     consumeStore.deleteSelectedItem(id)
+}
+function isSelectedItem(id: number) {
+    return selectedItems.value.some(i => i.id === id);
 }
 
 </script>
@@ -72,7 +78,8 @@ function deleteSelectedItem(id: number) {
                     @click="selectedTab = tab">{{ tab }}</button>
             </div>
             <div class="modal-list">
-                <div v-for="item in filteredItems" :key="item.name" class="modal-list-item" @click="addItem(item)">
+                <div v-for="item in filteredItems" :key="item.name" class="modal-list-item"
+                    :class="{ selected: isSelectedItem(item.id) }" @click="selectItem(item)">
                     <img :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon`">
                     {{ item.name }}
                 </div>
@@ -232,6 +239,11 @@ function deleteSelectedItem(id: number) {
     align-items: center;
     gap: 20px;
     font-weight: 800;
+}
+
+.modal-list-item.selected {
+    background: #2563EB;
+    color: #fff;
 }
 
 .modal-list-item:hover {

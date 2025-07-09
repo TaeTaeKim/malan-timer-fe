@@ -29,6 +29,11 @@ body {
   min-width: 320px;
   min-height: 100vh;
 }
+.default-background {
+  padding: 10px;
+  background-color: #343741;
+  border-radius: 8px;
+}
 
 h1 {
   line-height: 1.1;

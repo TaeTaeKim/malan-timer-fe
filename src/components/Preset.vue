@@ -4,7 +4,7 @@ const activeTab: Ref<'preset' | 'history'> = ref('preset')
 
 </script>
 <template>
-    <div class="preset-container">
+    <div class="preset-container default-background">
         <div class="tabs">
             <button :class="['tab-button', { active: activeTab === 'preset' }]" @click="activeTab = 'preset'">
                 소비 프리셋

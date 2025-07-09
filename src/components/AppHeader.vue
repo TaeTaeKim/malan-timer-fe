@@ -56,5 +56,6 @@
   font-size: 18px;
   height: 48px;
   border: 1px solid #b9bcbd;
+  border-radius: 8px;
 }
 </style>
