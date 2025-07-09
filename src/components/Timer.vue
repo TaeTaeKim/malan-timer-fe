@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, type Ref } from 'vue'
+import { useHuntStore } from '../stores/hunt'
+
+// 스토어 사용
+const huntStore = useHuntStore()
 
 // Active tab: 'timer' or 'stopwatch'
 const activeTab: Ref<'timer' | 'stopwatch'> = ref('timer')
@@ -21,11 +25,15 @@ const displayTime = computed<string>(() => {
 
 function activeStopwatch() {
   activeTab.value = 'stopwatch'
+  huntStore.setTimerMode('stopwatch')
   time.value = 0
+  huntStore.setTimer(0)
 }
 function activeTimer() {
   activeTab.value = 'timer'
+  huntStore.setTimerMode('timer')
   time.value = 0
+  huntStore.setTimer(0)
 }
 // Adjust timer by offset seconds
 function adjustTime(offset: number): void {
@@ -40,15 +48,18 @@ function formatOffset(sec: number): string {
 // Start timer/stopwatch
 function start(): void {
   if (intervalId !== null) return
+  if (activeTab.value === 'timer') {
+    huntStore.setTimer(time.value) // Save the initial set time
+  }
   intervalId = window.setInterval(() => {
     if (activeTab.value === 'timer') {
       if (time.value > 0) time.value--
       if (time.value === 0) {
         stop()
         alarmAudio.play()
+        huntStore.setUsedTime(huntStore.timer)
       }
-
-    } else {
+    } else { // 스톱워치는 그냥 계속 카운트
       time.value++
     }
   }, 1000)
@@ -59,6 +70,14 @@ function stop(): void {
   if (intervalId !== null) {
     clearInterval(intervalId)
     intervalId = null
+    // Save used time to store
+    if (activeTab.value === 'timer') {
+      // Used time is setTime - remaining time
+      huntStore.setUsedTime(huntStore.timer - time.value)
+    } else {
+      // Used time is just the elapsed time
+      huntStore.setUsedTime(time.value)
+    }
   }
 }
 
@@ -66,6 +85,10 @@ function stop(): void {
 function reset(): void {
   stop()
   time.value = 0
+  huntStore.setUsedTime(0)
+  if (activeTab.value === 'timer') {
+    huntStore.setTimer(0)
+  }
 }
 </script>
 

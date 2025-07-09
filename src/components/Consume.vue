@@ -2,9 +2,13 @@
 import { ref, computed } from 'vue';
 import { hpItems, mpItems, buffItems, etcItems, type Item } from '../data/items';
 import { useConsumeStore } from '../stores/consume';
+import { useHuntStore } from '../stores/hunt';
 
 
+// use store
 const consumeStore = useConsumeStore()
+const huntStore = useHuntStore()
+
 const showModal = ref<boolean>(false);
 const search = ref('');
 const tabs = ['hp', 'mp', 'buff', 'etc'];

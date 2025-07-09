@@ -19,11 +19,11 @@ import HuntResult from '../components/HuntResult.vue';
   <div class="hunt-info-container">
     <div class="hunt-start">
       <h2 class="hunt-title">사냥 전</h2>
-      <HuntInfo />
+      <HuntInfo type="start" />
     </div>
     <div class="hunt-end">
       <h2 class="hunt-title">사냥 후</h2>
-      <HuntInfo />
+      <HuntInfo type="end" />
     </div>
   </div>
   <div class="hunt-result">

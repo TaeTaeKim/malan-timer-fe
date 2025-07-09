@@ -1,10 +1,44 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useConsumeStore } from '../stores/consume';
+import { useHuntStore } from '../stores/hunt';
+
 const imageUrl = ref<string | null>(null)
+
+// props
+const props = defineProps<{ type: 'start' | 'end' }>();
+
+// store
+const huntStore = useHuntStore()
 const consumeStore = useConsumeStore()
 
+
 const selectedItems = computed(() => consumeStore.selectedItems)
+
+const quantities = computed(() =>
+    props.type === 'start' ? huntStore.startQuantities : huntStore.endQuantities
+);
+
+function updateQuantity(itemId: number, value: number) {
+    if (props.type === 'start') {
+        huntStore.setStartQuantity(itemId, value);
+    } else {
+        huntStore.setEndQuantity(itemId, value);
+    }
+}
+
+const huntInfo = computed(() =>
+    props.type === 'start' ? huntStore.huntStart : huntStore.huntEnd
+);
+
+function updateHuntInfo(field: keyof typeof huntStore.huntStart, value: number) {
+    if (props.type === 'start') {
+        huntStore.setHuntStart({ ...huntStore.huntStart, [field]: value });
+    } else {
+        huntStore.setHuntEnd({ ...huntStore.huntEnd, [field]: value });
+    }
+}
+
 function onFileChange(event: Event) {
     const files = (event.target as HTMLInputElement).files
     if (files && files[0]) {
@@ -47,15 +81,18 @@ function deleteSelectedItem(id: number) {
         <div class="level-exp-meso">
             <div class="level info-element">
                 <span class="level-title">LV.</span>
-                <input type="number" class="level-input hunt-input" id="level">
+                <input type="number" class="level-input hunt-input" id="level" :value="huntInfo.level"
+                    @input="updateHuntInfo('level', +(($event.target as HTMLInputElement)?.value || 0))">
             </div>
             <div class="exp info-element">
                 <span class="exp-title">EXP.</span>
-                <input type="number" class="exp-input hunt-input" id="exp">
+                <input type="number" class="exp-input hunt-input" id="exp" :value="huntInfo.exp"
+                    @input="updateHuntInfo('exp', +(($event.target as HTMLInputElement)?.value || 0))">
             </div>
             <div class="meso info-element">
                 <img src="../assets/meso.png" alt="meso-icon" class="meso-icon" style="width: 22px; height: 22px;">
-                <input type="number" class="meso-input hunt-input" id="meso">
+                <input type="number" class="meso-input hunt-input" id="meso" :value="huntInfo.meso"
+                    @input="updateHuntInfo('meso', +(($event.target as HTMLInputElement)?.value || 0))">
             </div>
         </div>
     </div>
@@ -68,7 +105,8 @@ function deleteSelectedItem(id: number) {
             <p style="width: 30%;">{{ item.name }}</p>
             <label style="margin-left: 3px; font-weight: 400; width: 30%;">
                 개수:
-                <input type="number" min="0" style="width: 50%;margin-left: 1px;">
+                <input type="number" min="0" style="width: 50%;margin-left: 1px;" :value="quantities[item.id] || 0"
+                    @input="updateQuantity(item.id, +(($event.target as HTMLInputElement)?.value || 0))">
             </label>
             <button @click="deleteSelectedItem(item.id)">×</button>
         </div>
