@@ -1,4 +1,15 @@
 <script setup lang="ts">
+import { ref } from 'vue';
+import SupportModal from '../components/SupportModal.vue'
+
+const isSupportOpen = ref<Boolean>(false)
+const toggleSupport = () => {
+  isSupportOpen.value = !isSupportOpen.value;
+}
+
+function goToNotifier() {
+  window.open('https://malanutil.com/malan-alerter', '_blank');
+}
 </script>
 
 <template>
@@ -8,10 +19,12 @@
       <h1>메랜 사냥 타이머</h1>
     </div>
     <div class="header-actions">
+
       <div class="support-container">
-        <button class="support-btn" @click="">💸 후원하기</button>
+        <button class="header-button" @click="toggleSupport">💸 후원하기</button>
+        <SupportModal :is-open="isSupportOpen" />
       </div>
-      <!-- <button @click="handleLogout" class="logout-btn">로그아웃</button> -->
+      <button class="header-button" @click="goToNotifier">메랜지지 알리미</button>
     </div>
   </header>
 </template>
@@ -48,13 +61,16 @@
   border-radius: 8px;
 }
 
-.support-btn {
+
+.header-button {
   padding: 3px 12px 3px 12px;
   color: white;
   background: #1D1E23;
   font-weight: bolder;
   font-size: 18px;
   height: 48px;
+  border: none;
+  border-radius: 8px;
   border: 1px solid #b9bcbd;
   border-radius: 8px;
 }
