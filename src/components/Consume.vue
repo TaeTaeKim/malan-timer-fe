@@ -2,12 +2,10 @@
 import { ref, computed } from 'vue';
 import { hpItems, mpItems, buffItems, etcItems, type Item } from '../data/items';
 import { useConsumeStore } from '../stores/consume';
-import { useHuntStore } from '../stores/hunt';
 
 
 // use store
 const consumeStore = useConsumeStore()
-const huntStore = useHuntStore()
 
 const showModal = ref<boolean>(false);
 const search = ref('');
@@ -21,8 +19,23 @@ const itemList = {
     etc: etcItems
 }
 
+const isComposing = ref(false);
+
+function onInput(e: Event) {
+    if (!isComposing.value) {
+        search.value = (e.target as HTMLInputElement).value;
+    }
+}
+function onCompositionEnd(e: CompositionEvent) {
+    isComposing.value = false;
+    search.value = (e.target as HTMLInputElement).value;
+}
 const filteredItems = computed(() => {
-    return itemList[selectedTab.value as keyof typeof itemList] || [];
+    const list = itemList[selectedTab.value as keyof typeof itemList] || [];
+    if (!search.value) return list;
+    return list.filter(item =>
+        item.name.includes(search.value)
+    );
 });
 
 const selectedItems = computed(() => consumeStore.selectedItems)
@@ -71,7 +84,8 @@ function isSelectedItem(id: number) {
     <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
         <div class="modal-container">
             <div class="modal-header">
-                <input v-model="search" class="potion-search" placeholder="소비템 검색">
+                <input v-model="search" class="potion-search" :placeholder="`${selectedTab} 아이템 검색`"
+                    @compositionstart="isComposing = true" @compositionend="onCompositionEnd" @input="onInput" />
             </div>
             <div class="modal-tabs">
                 <button v-for="tab in tabs" :key="tab" :class="['modal-tab', { active: selectedTab === tab }]"
