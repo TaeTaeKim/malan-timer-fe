@@ -48,7 +48,7 @@ async function extractInfoFromImage(file: File) {
         // AI 서버의 /extract 엔드포인트로 요청
         const formData = new FormData();
         formData.append('file', file);
-        const response = await axios.post('/extract', formData, {
+        const response = await axios.post('extract', formData, {
             headers: { 'Content-Type': 'multipart/form-data' },
             timeout: 5000,
         });

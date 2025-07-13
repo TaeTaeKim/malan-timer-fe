@@ -8,7 +8,7 @@ const huntStore = useHuntStore()
 // Active tab: 'timer' or 'stopwatch'
 const activeTab: Ref<'timer' | 'stopwatch'> = ref('timer')
 const displayWidth = computed(() => activeTab.value === 'timer' ? '60%' : '100%')
-const alarmAudio = new Audio('/alarm-sound.mp3')
+const alarmAudio = new Audio('alarm-sound.mp3')
 
 // Time state in seconds
 const time: Ref<number> = ref(0)
