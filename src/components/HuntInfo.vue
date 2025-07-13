@@ -166,7 +166,7 @@ function deleteSelectedItem(id: number) {
 .image-dropbox {
     display: flex;
     flex-direction: column;
-    border: 2px dashed #aaa;
+    border: 1px dashed #aaa;
     padding: 10px;
     cursor: pointer;
     height: 80px;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useConsumeStore } from '../stores/consume';
 import { useHuntStore } from '../stores/hunt';
 import { requiredExp } from '../data/requiredExp';
@@ -8,8 +8,13 @@ const consumeStore = useConsumeStore()
 const huntStore = useHuntStore()
 
 const huntTime = computed(() => huntStore.usedTime);
-function formatOffset(sec: number): string {
-    return sec >= 60 ? `${sec / 60}분` : `${sec}초`
+function formatOffset(time: number) {
+    if (time >= 3600) {
+        return `${Math.round(time / 60)}분`;
+    }
+    const min = Math.floor(time / 60);
+    const sec = time % 60;
+    return `${min}분 ${sec}초`;
 }
 const earnedExp = computed(() => {
     const startLevel = huntStore.huntStart.level;
@@ -63,14 +68,46 @@ const usedConsumables = computed(() =>
 const totalUsedPrice = computed(() =>
     usedConsumables.value.reduce((sum, item) => sum + item.usedPrice, 0)
 );
+
+const isEditingTime = ref(false);
+const editMin = ref(0);
+const editSec = ref(0);
+
+function startEditTime() {
+    isEditingTime.value = true;
+    // Parse current huntTime into min/sec
+    editMin.value = Math.floor(huntTime.value / 60) % 60;
+    editSec.value = huntTime.value % 60;
+}
+
+function saveEditTime() {
+    let totalSec = editMin.value * 60 + editSec.value;
+    huntStore.setUsedTime(totalSec);
+    isEditingTime.value = false;
+}
+function cancelEditTime() {
+    isEditingTime.value = false;
+}
 </script>
 <template>
     <div class="hunt-result-container">
         <h2 class="hunt-result-title">사냥 결과</h2>
         <div class="result-info">
             <div class="result-time">
-                <p style="font-weight: 900; font-size: 20px; padding-bottom: 10px;">사냥 시간 : {{ formatOffset(huntTime) }}
-                </p>
+                <template v-if="!isEditingTime">
+                    <p style="font-weight: 900; font-size: 20px; padding-bottom: 10px;">
+                        사냥 시간 : {{ formatOffset(huntTime) }}
+                        <button @click="startEditTime" class="edit-time-btn">수정</button>
+                    </p>
+                </template>
+                <template v-else>
+                    <input type="number" v-model.number="editMin" min="0" max="59" class="edit-time-input"
+                        style="width: 60px" placeholder="분" /> 분
+                    <input type="number" v-model.number="editSec" min="0" max="59" class="edit-time-input"
+                        style="width: 60px" placeholder="초" /> 초
+                    <button @click="saveEditTime" class="edit-time-btn">저장</button>
+                    <button @click="cancelEditTime" class="edit-time-btn">취소</button>
+                </template>
             </div>
             <div class="result-exp-profit" style=" padding-bottom: 10px;">
                 <div class="result-exp"
@@ -147,5 +184,28 @@ p {
 .result-consume-item {
     display: flex;
     align-items: center;
+}
+
+.edit-time-btn {
+    margin-left: 8px;
+    font-size: 14px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    border: none;
+    background: #484B56;
+    color: #fff;
+    cursor: pointer;
+}
+
+.edit-time-btn:hover {
+    background: #2563EB;
+}
+
+.edit-time-input {
+    font-size: 18px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+    margin-right: 8px;
 }
 </style>

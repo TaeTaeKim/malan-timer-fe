@@ -48,7 +48,7 @@ function formatOffset(sec: number): string {
 // Start timer/stopwatch
 function start(): void {
   if (intervalId !== null) return
-  if (activeTab.value === 'timer') {
+  if (activeTab.value === 'timer' && huntStore.timer === 0) {
     huntStore.setTimer(time.value) // Save the initial set time
   }
   intervalId = window.setInterval(() => {
