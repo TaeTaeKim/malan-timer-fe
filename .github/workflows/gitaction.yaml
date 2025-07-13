@@ -50,18 +50,18 @@ jobs:
           platforms: linux/arm64
   #          cache-from: type=registry,ref=${{ secrets.CONTAINER_REGISTRY_URL }}/malan-alerter-be:latest
   #          cache-to: type=inline
-  # deploy:
-  #   needs:
-  #     - build-and-push-image
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Execute remote script
-  #       uses: appleboy/ssh-action@v1.2.2
-  #       with:
-  #         host: ${{ secrets.REMOTE_HOST }}
-  #         port: 20022
-  #         username: ${{ secrets.REMOTE_USER }}
-  #         key: ${{ secrets.SSH_PRIVATE_KEY }}
-  #         script: |
-  #           cd /home/hc07car/malan-timer
-  #           sh patch-timer-fe.sh ${{env.MAJOR_VERSION}}.${{ env.MINOR_VERSION }}.${{ needs.build-and-push-image.outputs.sha_short }}
+  deploy:
+    needs:
+      - build-and-push-image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Execute remote script
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          port: 20022
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/hc07car/malan-timer
+            sh patch-timer-fe.sh ${{env.MAJOR_VERSION}}.${{ env.MINOR_VERSION }}.${{ needs.build-and-push-image.outputs.sha_short }}
