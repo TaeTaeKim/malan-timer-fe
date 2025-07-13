@@ -19,12 +19,16 @@ function goToNotifier() {
       <h1>메랜 사냥 타이머</h1>
     </div>
     <div class="header-actions">
-
       <div class="support-container">
         <button class="header-button" @click="toggleSupport">💸 후원하기</button>
         <SupportModal :is-open="isSupportOpen" />
       </div>
       <button class="header-button" @click="goToNotifier">메랜지지 알리미</button>
+      <!-- <button class="header-button"
+        style="background-color: #5865f2; display: flex; align-items: center; gap: 5px; border: none;">
+        <span>로그인</span>
+        <span><img src="https://cdn.discordapp.com/embed/avatars/0.png" alt="" style="width: 30px;"></span>
+      </button> -->
     </div>
   </header>
 </template>

@@ -18,6 +18,9 @@ export const useConsumeStore = defineStore("consume", {
     deleteSelectedItem(id: number) {
       this.selectedItems = this.selectedItems.filter((item) => item.id !== id);
     },
+    clear() {
+      this.selectedItems = [];
+    },
     updateItem(id: number, data: Partial<SelectedItem>) {
       const item = this.selectedItems.find((i) => i.id === id);
       if (item) Object.assign(item, data);

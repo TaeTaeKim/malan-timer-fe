@@ -13,6 +13,9 @@ const activeTab: Ref<'preset' | 'history'> = ref('preset')
                 사냥 히스토리
             </button>
         </div>
+        <div>
+            열심히 개발중입니다🔥
+        </div>
     </div>
 </template>
 <style scoped>
@@ -32,15 +35,16 @@ const activeTab: Ref<'preset' | 'history'> = ref('preset')
     border: none;
     border-bottom: 2px solid transparent;
     background: none;
-    font-weight: bolder;
+    font-weight: 900;
+    font-size: 15px;
     color: white;
     cursor: pointer;
     transition: color 0.2s, border-color 0.2s;
 }
 
 .tab-button.active {
-    color: #2563EB;
-    border-color: #2563EB;
+    color: #FF6239;
+    border-color: #FF6239;
 }
 
 button:focus {

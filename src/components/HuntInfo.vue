@@ -224,7 +224,6 @@ function deleteSelectedItem(id: number) {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-weight: 800;
     height: 35px;
 }
 </style>

@@ -64,7 +64,10 @@ function isSelectedItem(id: number) {
 <template>
     <div class="consume-section">
         <h2 class="consume-title">소비 아이템 설정</h2>
-        <div class="consume-list">
+        <div v-if="selectedItems.length === 0" class="consume-empty-message">
+            사냥에서 사용하는 아이템을 추가해보세요
+        </div>
+        <div v-else class="consume-list">
             <div v-for="item in selectedItems" :key="item.id" class="consume-list-item">
                 <div class="item-info">
                     <img :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon?`"
@@ -80,8 +83,11 @@ function isSelectedItem(id: number) {
 
         </div>
         <div class="consume-section-botton">
-            <button class="consume-add" @click="showModal = true">추가</button>
-            <button class="consume-save">프리셋 저장</button>
+            <button class="consume-add consume-btn" @click="showModal = true">소비 아이템 추가</button>
+            <div style="display: flex; gap:10px;width: 30%;">
+                <button class="consume-save consume-btn">프리셋 저장</button>
+                <button class="consume-reset consume-btn" @click="consumeStore.clear()">초기화</button>
+            </div>
         </div>
     </div>
 
@@ -114,7 +120,7 @@ function isSelectedItem(id: number) {
     background-color: #343741;
     border-radius: 8px;
     margin-bottom: 10px;
-    min-height: 220px;
+    min-height: 230px;
     padding: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 
@@ -138,7 +144,6 @@ function isSelectedItem(id: number) {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-weight: 800;
     height: 35px;
 }
 
@@ -156,19 +161,40 @@ function isSelectedItem(id: number) {
 
 .consume-section-botton {
     display: flex;
-    height: 30px;
-    justify-content: end;
+    height: 35px;
+    justify-content: space-between;
     gap: 10px;
 }
 
-.consume-section-botton>button {
+.consume-btn {
     font-size: 18px;
-    font-weight: 900;
+    font-weight: 500;
     border-radius: 8px;
     background: none;
     border: 2px solid #484B56;
+    height: 100%;
 }
 
+.consume-btn:hover {
+    background: #515972;
+}
+
+.consume-add {
+    width: 20%;
+}
+
+.consume-save,
+.consume-reset {
+    width: 50%;
+}
+
+.consume-empty-message {
+    text-align: center;
+    color: #888;
+    padding: 20px;
+    font-size: 20px;
+    height: 120px;
+}
 
 .modal-overlay {
     position: fixed;
