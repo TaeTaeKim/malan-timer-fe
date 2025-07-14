@@ -16,7 +16,7 @@ function goToNotifier() {
   <header class="app-header">
     <div class="logo-title">
       <img src="../assets/logo.png" alt="Logo" class="logo-image">
-      <h1>메랜 사냥 타이머</h1>
+      <h1 class="title-text">메랜 사냥 타이머</h1>
     </div>
     <div class="header-actions">
       <div class="support-container">

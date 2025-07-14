@@ -71,16 +71,20 @@ h2 {
   margin: 0 auto;
   padding: 20px;
 }
+.title-text {
+  color: white;
+}
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
+    color: #fff;
     background-color: #ffffff;
   }
   a:hover {
     color: #747bff;
   }
   button {
-    background-color: #f9f9f9;
+    background-color: gray;
+    color: #fff;
   }
 }
