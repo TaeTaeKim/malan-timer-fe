@@ -50,4 +50,11 @@ const activeTab: Ref<'preset' | 'history'> = ref('preset')
 button:focus {
     outline: none;
 }
+
+@media(max-width:600px) {
+    .preset-container {
+        width: 94%;
+        padding: 10px 3% 10px 3%;
+    }
+}
 </style>

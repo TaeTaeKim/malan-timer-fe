@@ -84,7 +84,7 @@ function isSelectedItem(id: number) {
         </div>
         <div class="consume-section-botton">
             <button class="consume-add consume-btn" @click="showModal = true">소비 아이템 추가</button>
-            <div style="display: flex; gap:10px;width: 30%;">
+            <div class="save-reset-btn">
                 <button class="consume-save consume-btn">프리셋 저장</button>
                 <button class="consume-reset consume-btn" @click="consumeStore.clear()">초기화</button>
             </div>
@@ -181,6 +181,12 @@ function isSelectedItem(id: number) {
 
 .consume-add {
     width: 20%;
+}
+
+.save-reset-btn {
+    display: flex;
+    gap: 10px;
+    width: 30%;
 }
 
 .consume-save,
@@ -304,5 +310,72 @@ function isSelectedItem(id: number) {
     color: #fff;
     font-size: 16px;
     cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    .consume-section {
+        width: 94%;
+        padding: 10px 3% 10px 3%;
+    }
+
+    .consume-list {
+        grid-template-columns: 1fr !important;
+        height: auto;
+        column-gap: 0;
+    }
+
+    .consume-section-botton {
+        flex-direction: column;
+        gap: 6px;
+        height: auto;
+        align-items: stretch;
+    }
+
+    .consume-btn {
+        font-size: 15px;
+        padding: 6px 0;
+        width: 100% !important;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    .save-reset-btn {
+        width: 100%;
+        display: flex;
+    }
+
+    .consume-add,
+    .consume-save,
+    .consume-reset {
+        width: 100% !important;
+    }
+
+    .consume-empty-message {
+        font-size: 16px;
+        height: 80px;
+        padding: 12px;
+    }
+
+    .modal-container {
+        min-width: 90vw !important;
+        max-width: 98vw !important;
+        min-height: 80vh !important;
+        max-height: 90vh !important;
+        padding: 12px 4vw 8px 4vw !important;
+        font-size: 15px;
+        box-sizing: border-box;
+        overflow-y: auto;
+    }
+
+    .modal-list {
+        max-height: 70vh !important;
+        margin-bottom: 7px;
+    }
+
+    .modal-close {
+        font-size: 15px;
+        margin: 0;
+        padding: 6px 10px;
+    }
 }
 </style>
