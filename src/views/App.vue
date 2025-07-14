@@ -166,6 +166,7 @@ onMounted(() => {
   min-height: 400px;
 }
 
+
 .app-footer {
   margin-top: 40px;
   padding: 20px 0 10px 0;
@@ -191,5 +192,23 @@ onMounted(() => {
 .copyright {
   margin-top: 6px;
   font-size: 13px;
+}
+
+@media(max-width:600px) {
+  .hunt-title {
+    font-size: 1.1rem;
+  }
+
+  .hunt-start,
+  .hunt-end {
+    width: 94% !important;
+    padding: 10px 3% 10px 3% !important;
+  }
+
+  .hunt-info-container,
+  .timer-preset-container {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
 }
 </style>

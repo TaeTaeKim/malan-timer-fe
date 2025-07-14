@@ -120,11 +120,10 @@ function deleteSelectedItem(id: number) {
     <div class="image-dropbox" @drop="onDrop" @dragover.prevent @paste="onPaste" tabindex="0">
         <div v-if="!loading">
             <input type="file" accept="image/*" @change="onFileChange" />
-            <p style="margin: 0; font-size: 15px; color: beige">메랜 게임 스샷을 넣으면 레벨, 경험치, 메소가 자동입력됩니다.</p>
-            <p style="margin: 0;">드래그, 영역 클릭 후 붙여넣기(Ctrl+V)</p>
+            <p class="info-desc" style="color: beige;">메랜 게임 스샷을 넣으면 레벨, 경험치, 메소가 자동입력됩니다.</p>
+            <p class="info-desc">드래그, 영역 클릭 후 붙여넣기(Ctrl+V)</p>
         </div>
-        <div v-if="loading"
-            style="color: #2563EB; font-weight: 900; text-align: center; font-size: 40px; margin-top: 5px;">추출중..</div>
+        <div v-if="loading" class="loading-text">추출중..</div>
     </div>
     <div class="hunt-info">
         <div class="level-exp-meso">
@@ -151,7 +150,7 @@ function deleteSelectedItem(id: number) {
         <div v-for="item in selectedItems" :key="item.id" class="hunt-consume-item">
             <img :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon`"
                 style="margin-right: 5px; width: 30px;">
-            <p style="width: 30%;">{{ item.name }}</p>
+            <p class="item-name">{{ item.name }}</p>
             <label style="margin-left: 3px; font-weight: 400; width: 30%;">
                 개수:
                 <input type="number" min="0" style="width: 50%;margin-left: 1px;" :value="quantities[item.id] || 0"
@@ -225,5 +224,41 @@ function deleteSelectedItem(id: number) {
     align-items: center;
     justify-content: space-between;
     height: 35px;
+}
+
+.loading-text {
+    color: #2563EB;
+    font-weight: 900;
+    text-align: center;
+    font-size: 2.2rem;
+    margin-top: 5px;
+}
+
+.info-desc {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.item-name {
+    width: 30%;
+}
+
+@media (max-width: 600px) {
+    .info-desc {
+        font-size: 0.85rem;
+    }
+
+    .image-dropbox {
+        height: auto;
+    }
+
+    .hunt-consume>h3 {
+        font-size: 1rem;
+    }
+
+    .item-name {
+        width: 45%;
+        font-size: .95rem;
+    }
 }
 </style>

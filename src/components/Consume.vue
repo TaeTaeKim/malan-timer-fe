@@ -318,6 +318,10 @@ function isSelectedItem(id: number) {
         padding: 10px 3% 10px 3%;
     }
 
+    .consume-title {
+        font-size: 1.1rem;
+    }
+
     .consume-list {
         grid-template-columns: 1fr !important;
         height: auto;

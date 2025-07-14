@@ -79,20 +79,6 @@ h2 {
     margin: 0 !important;
     padding: 0 !important;
   }
-
-  .hunt-start,
-  .hunt-end {
-    width: 100% !important;
-    min-width: 0 !important;
-    margin: 0 !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-  .hunt-info-container,
-  .timer-preset-container {
-    flex-direction: column !important;
-    gap: 0 !important;
-  }
 }
 
 @media (prefers-color-scheme: light) {
