@@ -237,4 +237,40 @@ function reset(): void {
 button:focus {
   outline: none;
 }
+
+@media (max-width: 600px) {
+  .timer-container {
+    margin-bottom: 10px;
+    width: 94%;
+    padding: 10px 3% 10px 3%;
+
+  }
+
+  .display-contianer {
+    flex-direction: column;
+    gap: 0;
+    align-items: stretch;
+  }
+
+  .display {
+    width: 100% !important;
+    font-size: 2.2rem;
+    padding: 16px 0;
+  }
+
+  .adjust-grid {
+    width: 100% !important;
+    margin-top: 10px;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .btn-adjust {
+    margin: 0;
+  }
+
+  .btn-action {
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+}
 </style>
