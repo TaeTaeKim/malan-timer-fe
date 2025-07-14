@@ -120,7 +120,7 @@ function deleteSelectedItem(id: number) {
     <div class="image-dropbox" @drop="onDrop" @dragover.prevent @paste="onPaste" tabindex="0">
         <div v-if="!loading">
             <input type="file" accept="image/*" @change="onFileChange" />
-            <p style="margin: 0;">메랜 게임 스샷을 넣으면 레벨, 경험치, 메소가 자동입력됩니다.</p>
+            <p style="margin: 0; font-size: 15px; color: beige">메랜 게임 스샷을 넣으면 레벨, 경험치, 메소가 자동입력됩니다.</p>
             <p style="margin: 0;">드래그, 영역 클릭 후 붙여넣기(Ctrl+V)</p>
         </div>
         <div v-if="loading"
