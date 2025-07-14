@@ -60,11 +60,14 @@ function goToNotifier() {
   width: auto;
 }
 
+.title-text {
+  color: white;
+}
+
 .support-container {
   position: relative;
   border-radius: 8px;
 }
-
 
 .header-button {
   padding: 3px 12px 3px 12px;
@@ -77,5 +80,25 @@ function goToNotifier() {
   border-radius: 8px;
   border: 1px solid #b9bcbd;
   border-radius: 8px;
+}
+
+@media (max-width: 600px) {
+  .app-header {
+    height: 36px;
+  }
+
+  .logo-image {
+    height: 24px;
+  }
+
+  .title-text {
+    font-size: 1.3rem;
+  }
+
+  .header-button {
+    font-size: 13px;
+    height: 28px;
+    padding: 2px 8px 2px 8px;
+  }
 }
 </style>
