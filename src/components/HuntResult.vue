@@ -95,7 +95,7 @@ function cancelEditTime() {
         <div class="result-info">
             <div class="result-time">
                 <template v-if="!isEditingTime">
-                    <p style="font-weight: 900; font-size: 20px; padding-bottom: 10px;">
+                    <p class="result-time-text">
                         사냥 시간 : {{ formatOffset(huntTime) }}
                         <button @click="startEditTime" class="edit-time-btn">수정</button>
                     </p>
@@ -109,23 +109,21 @@ function cancelEditTime() {
                     <button @click="cancelEditTime" class="edit-time-btn">취소</button>
                 </template>
             </div>
-            <div class="result-exp-profit" style=" padding-bottom: 10px;">
-                <div class="result-exp"
-                    style="width: 50%; border-bottom: 2px solid greenyellow; display: flex; align-items: center;">
-                    <p style="font-weight: 900; font-size: 20px; color:greenyellow">EXP</p>
-                    <p style="margin-left: 20px;">{{ earnedExp }}</p>
+            <div class="result-exp-profit">
+                <div class="result-exp">
+                    <p class="result-exp-title">EXP</p>
+                    <p class="result-exp-value">{{ earnedExp }}</p>
                 </div>
-                <div class="result-profit"
-                    style="width: 50%;border-bottom: 2px solid gold; display: flex; align-items: center;">
-                    <p style="font-weight: 900; font-size: 20px; color:gold">수익</p>
-                    <p style="margin-left: 20px;">{{ earnedMeso - totalUsedPrice }}</p>
+                <div class="result-profit">
+                    <p class="result-profit-title">수익</p>
+                    <p class="result-profit-value">{{ earnedMeso - totalUsedPrice }}</p>
                 </div>
             </div>
-            <div class="result-earn-requiredtime" style="margin: 10px 0;">
-                <div class="result-earn" style="width: 50%; border-bottom: 2px solid;">
+            <div class="result-earn-requiredtime">
+                <div class="result-earn">
                     <p>획득메소 : {{ earnedMeso }}</p>
                 </div>
-                <div class="result-levelup-time" style="width: 50%; border-bottom: 2px solid;">
+                <div class="result-levelup-time">
                     <p>레벨업까지 필요시간 : {{ needTimeForLevelup }}</p>
                 </div>
             </div>
@@ -171,9 +169,51 @@ p {
     gap: 20px;
 }
 
+.result-exp,
+.result-profit {
+    width: 50%;
+    border-bottom: 2px solid;
+    display: flex;
+    align-items: center;
+    padding: 6px 0;
+    gap: 12px;
+}
+
+.result-exp {
+    border-color: greenyellow;
+}
+
+.result-profit {
+    border-color: gold;
+}
+
+.result-exp-title {
+    font-weight: 900;
+    font-size: 20px;
+    color: greenyellow;
+}
+
+.result-profit-title {
+    font-weight: 900;
+    font-size: 20px;
+    color: gold;
+}
+
+.result-exp-value,
+.result-profit-value {
+    margin-left: 20px;
+}
+
 .result-earn-requiredtime {
     display: flex;
     gap: 20px;
+}
+
+.result-earn,
+.result-levelup-time {
+    width: 50%;
+    border-bottom: 2px solid;
+    padding: 6px 0;
 }
 
 .result-consume-list {
@@ -184,6 +224,7 @@ p {
 .result-consume-item {
     display: flex;
     align-items: center;
+    font-size: 1rem;
 }
 
 .edit-time-btn {
@@ -207,5 +248,58 @@ p {
     border-radius: 6px;
     border: 1px solid #aaa;
     margin-right: 8px;
+}
+
+@media (max-width: 600px) {
+    .hunt-result-container {
+        padding: 10px 3% 10px 3%;
+        margin-top: 8px;
+    }
+
+    .hunt-result-title {
+        margin-bottom: 10px;
+        font-size: 1rem;
+    }
+
+    .result-exp-profit,
+    .result-earn-requiredtime {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .result-exp,
+    .result-profit,
+    .result-earn,
+    .result-levelup-time {
+        width: 100% !important;
+        min-width: 0;
+        box-sizing: border-box;
+        padding: 6px 0;
+        font-size: 1rem;
+    }
+
+    .result-exp-title,
+    .result-profit-title {
+        font-size: 1rem;
+    }
+
+    .result-exp-value,
+    .result-profit-value {
+        margin-left: 10px;
+        font-size: 1rem;
+    }
+
+    .result-consume-list {
+        grid-template-columns: 1fr !important;
+        gap: 4px;
+    }
+
+    .result-consume-item {
+        font-size: 0.95rem;
+    }
+
+    p {
+        font-size: 1rem;
+    }
 }
 </style>
