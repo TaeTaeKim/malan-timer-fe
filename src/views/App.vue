@@ -163,7 +163,7 @@ onMounted(() => {
   width: 50%;
   background-color: #343741;
   border-radius: 8px;
-  min-height: 400px;
+  height: 400px;
 }
 
 
@@ -203,6 +203,7 @@ onMounted(() => {
   .hunt-end {
     width: 94% !important;
     padding: 10px 3% 10px 3% !important;
+    height: auto;
   }
 
   .hunt-info-container,

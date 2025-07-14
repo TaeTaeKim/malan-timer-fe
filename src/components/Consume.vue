@@ -363,8 +363,8 @@ function isSelectedItem(id: number) {
     .modal-container {
         min-width: 90vw !important;
         max-width: 98vw !important;
-        min-height: 80vh !important;
-        max-height: 90vh !important;
+        min-height: 60vh !important;
+        max-height: 70vh !important;
         padding: 12px 4vw 8px 4vw !important;
         font-size: 15px;
         box-sizing: border-box;
