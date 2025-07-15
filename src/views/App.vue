@@ -44,6 +44,8 @@ onMounted(() => {
       <p>메랜지지 원하는 매물을 디스코드 알람으로 받아보세요!<br>
         <a href="https://malanutil.com/malan-alerter/" target="_blank" rel="noopener">메랜지지알리미 링크</a>
         <br><span style="font-size: 14px; color: bisque;">알림 서비스는 알림 발송을 위해 디스코드 로그인이 필요합니다.</span>
+        <br><br>
+        현재 모바일 메랜 화면,핸드폰 촬영화면은 인식이 잘 되지 않습니다🥲.<br> 학습으로 개선될 예정입니다.
       </p>
       <div class="ad-modal-actions">
         <button @click="closeAdModalToday">오늘 하루 보지 않기</button>

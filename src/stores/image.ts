@@ -37,28 +37,33 @@ export const useImageStore = defineStore("image", () => {
         timeout: 10000,
       });
       const { extracted_data } = response.data;
-      const hasAnyField =
-        extracted_data &&
-        (extracted_data.level != null ||
-          extracted_data.exp != null ||
-          extracted_data.meso != null);
+      extracted = {
+        level: Number(extracted_data?.level),
+        exp: Number(extracted_data?.exp),
+        meso: Number(extracted_data?.meso),
+      };
 
-      if (hasAnyField) {
-        inferenceSuccess = true;
-        extracted = {
-          level: Number(extracted_data.level),
-          exp: Number(extracted_data.exp),
-          meso: Number(extracted_data.meso),
-        };
-      } else {
-        throw new Error("No valid extracted_data in response");
+      const allFieldsNull =
+        extracted_data?.level == null &&
+        extracted_data?.exp == null &&
+        extracted_data?.meso == null;
+
+      const hasValidFields =
+        extracted_data &&
+        extracted_data.level != null &&
+        extracted_data.exp != null;
+
+      inferenceSuccess = hasValidFields;
+
+      if (allFieldsNull) {
+        alert("AI 추출에 실패했습니다.");
       }
     } catch (e) {
       alert("AI 추출에 실패했습니다.");
     } finally {
       // Always save image, regardless of error
       uploadToMinio(file, inferenceSuccess);
-      if (inferenceSuccess && extracted) {
+      if (extracted) {
         onExtracted(extracted);
       }
       loading.value = false;
