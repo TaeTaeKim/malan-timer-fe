@@ -25,6 +25,8 @@ export const useImageStore = defineStore("image", () => {
     onExtracted: (data: { level: number; exp: number; meso: number }) => void
   ) {
     loading.value = true;
+    let inferenceSuccess = false;
+    let extracted: { level: number; exp: number; meso: number } | null = null;
     try {
       // AI 추출
       const formData = new FormData();
@@ -41,23 +43,24 @@ export const useImageStore = defineStore("image", () => {
           extracted_data.exp != null ||
           extracted_data.meso != null);
 
-      if (!hasAnyField) {
-        // MinIO 저장 (fire-and-forget)
-        uploadToMinio(file, false);
-        throw new Error("No valid extracted_data in response");
-      } else {
-        // MinIO 저장 (fire-and-forget)
-        uploadToMinio(file, true);
-        // 콜백으로 결과 전달
-        onExtracted({
+      if (hasAnyField) {
+        inferenceSuccess = true;
+        extracted = {
           level: Number(extracted_data.level),
           exp: Number(extracted_data.exp),
           meso: Number(extracted_data.meso),
-        });
+        };
+      } else {
+        throw new Error("No valid extracted_data in response");
       }
     } catch (e) {
       alert("AI 추출에 실패했습니다.");
     } finally {
+      // Always save image, regardless of error
+      uploadToMinio(file, inferenceSuccess);
+      if (inferenceSuccess && extracted) {
+        onExtracted(extracted);
+      }
       loading.value = false;
     }
   }
