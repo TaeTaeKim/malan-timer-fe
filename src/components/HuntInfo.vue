@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 import { useConsumeStore } from '../stores/consume';
 import { useHuntStore } from '../stores/hunt';
 import { useImageStore } from '../stores/image';
+import { requiredExp } from '../data/requiredExp';
 
 const imageUrl = ref<string | null>(null)
 
@@ -34,20 +35,48 @@ const huntInfo = computed(() =>
 );
 
 function updateHuntInfo(field: keyof typeof huntStore.huntStart, value: number) {
+    let newData;
     if (props.type === 'start') {
-        huntStore.setHuntStart({ ...huntStore.huntStart, [field]: value });
+        newData = { ...huntStore.huntStart, [field]: value };
+        if (newData.level === 0) {
+            // If level is 0, do not calculate percent or exp
+            if (field === 'exp') newData.percent = 0;
+            if (field === 'percent') newData.exp = 0;
+        } else if (field === 'exp' || field === 'level') {
+            const reqExp = requiredExp[newData.level] || 1;
+            newData.percent = Math.floor((newData.exp / reqExp) * 10000) / 100; // 2 decimal places
+        } else if (field === 'percent') {
+            const reqExp = requiredExp[newData.level] || 1;
+            newData.exp = Math.floor((newData.percent / 100) * reqExp);
+        }
+        huntStore.setHuntStart(newData);
     } else {
-        huntStore.setHuntEnd({ ...huntStore.huntEnd, [field]: value });
+        newData = { ...huntStore.huntEnd, [field]: value };
+        if (newData.level === 0) {
+            if (field === 'exp') newData.percent = 0;
+            if (field === 'percent') newData.exp = 0;
+        } else if (field === 'exp' || field === 'level') {
+            const reqExp = requiredExp[newData.level] || 1;
+            newData.percent = Math.floor((newData.exp / reqExp) * 10000) / 100;
+        } else if (field === 'percent') {
+            const reqExp = requiredExp[newData.level] || 1;
+            newData.exp = Math.floor((newData.percent / 100) * reqExp);
+        }
+        huntStore.setHuntEnd(newData);
     }
 }
 
 function handleExtracted({ level, exp, meso }: { level: number, exp: number, meso: number }) {
+    const reqExp = requiredExp[level] || 1;
+    const percent = level === 0 ? 0 : Math.floor((exp / reqExp) * 10000) / 100; // 2 decimal places
+
     if (props.type === 'start') {
         huntStore.setHuntStart({
             ...huntStore.huntStart,
             level: !isNaN(level) ? level : huntStore.huntStart.level,
             exp: !isNaN(exp) ? exp : huntStore.huntStart.exp,
             meso: !isNaN(meso) ? meso : huntStore.huntStart.meso,
+            percent: !isNaN(percent) ? percent : huntStore.huntStart.percent,
         });
     } else {
         huntStore.setHuntEnd({
@@ -55,6 +84,7 @@ function handleExtracted({ level, exp, meso }: { level: number, exp: number, mes
             level: !isNaN(level) ? level : huntStore.huntEnd.level,
             exp: !isNaN(exp) ? exp : huntStore.huntEnd.exp,
             meso: !isNaN(meso) ? meso : huntStore.huntEnd.meso,
+            percent: !isNaN(percent) ? percent : huntStore.huntEnd.percent,
         });
     }
 }
@@ -92,6 +122,22 @@ function onPaste(event: ClipboardEvent) {
 function deleteSelectedItem(id: number) {
     consumeStore.deleteSelectedItem(id)
 }
+
+const formattedMeso = computed(() => {
+    const meso = huntInfo.value.meso || 0;
+    if (meso >= 100000000) {
+        const eok = Math.floor(meso / 100000000);
+        const man = Math.floor((meso % 100000000) / 10000);
+        if (man > 0) {
+            return `${eok.toLocaleString()}억 ${man.toLocaleString()}만 메소`;
+        } else {
+            return `${eok.toLocaleString()}억 메소`;
+        }
+    } else {
+        const man = Math.floor(meso / 10000);
+        return man > 0 ? `${man.toLocaleString()}만 메소` : '';
+    }
+});
 </script>
 
 <template>
@@ -104,7 +150,7 @@ function deleteSelectedItem(id: number) {
         <div v-if="imageStore.loading" class="loading-text">추출중..</div>
     </div>
     <div class="hunt-info">
-        <div class="level-exp-meso">
+        <div class="level-exp">
             <div class="level info-element">
                 <span class="level-title">LV.</span>
                 <input type="number" class="level-input hunt-input" id="level" :value="huntInfo.level"
@@ -114,20 +160,25 @@ function deleteSelectedItem(id: number) {
                 <span class="exp-title">EXP.</span>
                 <input type="number" class="exp-input hunt-input" id="exp" :value="huntInfo.exp"
                     @input="updateHuntInfo('exp', +(($event.target as HTMLInputElement)?.value || 0))">
+                <input type="number" class="exp-percent-input" :value="huntInfo.percent"
+                    @input="updateHuntInfo('percent', +(($event.target as HTMLInputElement)?.value || 0))">
+                <span style="font-weight: 800;">%</span>
+                </input>
             </div>
-            <div class="meso info-element">
-                <img src="../assets/meso.png" alt="meso-icon" class="meso-icon" style="width: 22px; height: 22px;">
-                <input type="number" class="meso-input hunt-input" id="meso" :value="huntInfo.meso"
-                    @input="updateHuntInfo('meso', +(($event.target as HTMLInputElement)?.value || 0))">
-            </div>
+        </div>
+        <div class="meso info-element">
+            <img src="../assets/meso.png" alt="meso-icon" class="meso-icon" style="width: 22px; height: 22px;">
+            <input type="number" class="meso-input hunt-input" id="meso" :value="huntInfo.meso"
+                @input="updateHuntInfo('meso', +(($event.target as HTMLInputElement)?.value || 0))">
+            <span class="meso-korean">{{ formattedMeso }}</span>
         </div>
     </div>
 
     <div class="hunt-consume">
         <h3>소비 내역</h3>
         <div v-for="item in selectedItems" :key="item.id" class="hunt-consume-item">
-            <img :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon`"
-                style="margin-right: 5px; width: 30px;" alt="아이템이미지">
+            <img :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon`" style="margin-right: 5px; width: 30px;"
+                alt="아이템이미지">
             <p class="item-name">{{ item.name }}</p>
             <label style="margin-left: 3px; font-weight: 400; width: 30%;">
                 개수:
@@ -156,9 +207,10 @@ function deleteSelectedItem(id: number) {
     outline: 2px solid #2563EB;
 }
 
-.level-exp-meso {
+.level-exp {
     display: flex;
     justify-content: space-between;
+    margin-bottom: 10px;
 }
 
 .info-element {
@@ -170,30 +222,54 @@ function deleteSelectedItem(id: number) {
     width: 20%;
 }
 
-.exp,
+.exp {
+    width: 75%;
+}
+
 .meso {
-    width: 40%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.meso-input {
+    width: 50%;
+}
+
+.meso-korean {
+    width: 100%;
+    text-align: right;
+    font-weight: 700;
+    color: #eab308;
+    padding-left: 8px;
 }
 
 
 /* level, exp, meso input */
-.level-input {
-    margin-left: 5px;
-    width: 100%;
-    height: 20px;
 
-}
-
+.level-input,
 .exp-input,
 .meso-input {
     margin-left: 5px;
+    font-size: 15px;
     width: 100%;
-    height: 20px;
+    height: 25px;
+    font-weight: bold;
+}
+
+.exp-percent-input {
+    margin-left: 5px;
+    font-size: 15px;
+    width: 40%;
+    height: 25px;
+    font-weight: bold;
+
 }
 
 /* level exp title font */
 .level-title,
 .exp-title {
+    font-size: 20px;
     font-weight: 900;
 }
 

@@ -4,14 +4,15 @@ export interface HuntInfo {
   level: number;
   exp: number;
   meso: number;
+  percent: number;
 }
 
 export const useHuntStore = defineStore("hunt", {
   state: () => ({
     startQuantities: {} as Record<number, number>,
     endQuantities: {} as Record<number, number>,
-    huntStart: { level: 0, exp: 0, meso: 0 } as HuntInfo,
-    huntEnd: { level: 0, exp: 0, meso: 0 } as HuntInfo,
+    huntStart: { level: 0, exp: 0, meso: 0, percent: 0.0 } as HuntInfo,
+    huntEnd: { level: 0, exp: 0, meso: 0, percent: 0.0 } as HuntInfo,
 
     // hunt time
     timerMode: "timer",
