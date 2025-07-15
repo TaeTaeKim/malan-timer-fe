@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { useConsumeStore } from '../stores/consume';
 import { useHuntStore } from '../stores/hunt';
-import axios from 'axios';
+import { useImageStore } from '../stores/image';
 
 const imageUrl = ref<string | null>(null)
 
@@ -12,6 +12,7 @@ const props = defineProps<{ type: 'start' | 'end' }>();
 // store
 const huntStore = useHuntStore()
 const consumeStore = useConsumeStore()
+const imageStore = useImageStore();
 
 
 const selectedItems = computed(() => consumeStore.selectedItems)
@@ -40,44 +41,21 @@ function updateHuntInfo(field: keyof typeof huntStore.huntStart, value: number) 
     }
 }
 
-const loading = ref(false);
-
-async function extractInfoFromImage(file: File) {
-    loading.value = true;
-    try {
-        // AI 서버의 /extract 엔드포인트로 요청
-        const formData = new FormData();
-        formData.append('file', file);
-        const response = await axios.post('extract', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' },
-            timeout: 5000,
+function handleExtracted({ level, exp, meso }: { level: number, exp: number, meso: number }) {
+    if (props.type === 'start') {
+        huntStore.setHuntStart({
+            ...huntStore.huntStart,
+            level: !isNaN(level) ? level : huntStore.huntStart.level,
+            exp: !isNaN(exp) ? exp : huntStore.huntStart.exp,
+            meso: !isNaN(meso) ? meso : huntStore.huntStart.meso,
         });
-        // 실제 응답 구조에 맞게 extracted_data에서 값 추출
-        const { extracted_data } = response.data;
-        if (!extracted_data) throw new Error('No extracted_data in response');
-        const level = Number(extracted_data.level);
-        const exp = Number(extracted_data.exp);
-        const meso = Number(extracted_data.meso);
-        // Update hunt info depending on type
-        if (props.type === 'start') {
-            huntStore.setHuntStart({
-                ...huntStore.huntStart,
-                level: !isNaN(level) ? level : huntStore.huntStart.level,
-                exp: !isNaN(exp) ? exp : huntStore.huntStart.exp,
-                meso: !isNaN(meso) ? meso : huntStore.huntStart.meso,
-            });
-        } else {
-            huntStore.setHuntEnd({
-                ...huntStore.huntEnd,
-                level: !isNaN(level) ? level : huntStore.huntEnd.level,
-                exp: !isNaN(exp) ? exp : huntStore.huntEnd.exp,
-                meso: !isNaN(meso) ? meso : huntStore.huntEnd.meso,
-            });
-        }
-    } catch (e) {
-        alert('AI 추출에 실패했습니다.');
-    } finally {
-        loading.value = false;
+    } else {
+        huntStore.setHuntEnd({
+            ...huntStore.huntEnd,
+            level: !isNaN(level) ? level : huntStore.huntEnd.level,
+            exp: !isNaN(exp) ? exp : huntStore.huntEnd.exp,
+            meso: !isNaN(meso) ? meso : huntStore.huntEnd.meso,
+        });
     }
 }
 
@@ -85,7 +63,7 @@ function onFileChange(event: Event) {
     const files = (event.target as HTMLInputElement).files
     if (files && files[0]) {
         imageUrl.value = URL.createObjectURL(files[0])
-        extractInfoFromImage(files[0]);
+        imageStore.processImage(files[0], handleExtracted);
     }
 }
 
@@ -93,7 +71,7 @@ function onDrop(event: DragEvent) {
     event.preventDefault()
     if (event.dataTransfer && event.dataTransfer.files.length > 0) {
         imageUrl.value = URL.createObjectURL(event.dataTransfer.files[0])
-        extractInfoFromImage(event.dataTransfer.files[0]);
+        imageStore.processImage(event.dataTransfer.files[0], handleExtracted);
     }
 }
 
@@ -105,7 +83,7 @@ function onPaste(event: ClipboardEvent) {
                 const file = item.getAsFile()
                 if (file) {
                     imageUrl.value = URL.createObjectURL(file)
-                    extractInfoFromImage(file);
+                    imageStore.processImage(file, handleExtracted);
                 }
             }
         }
@@ -118,12 +96,12 @@ function deleteSelectedItem(id: number) {
 
 <template>
     <div class="image-dropbox" @drop="onDrop" @dragover.prevent @paste="onPaste" tabindex="0">
-        <div v-if="!loading">
+        <div v-if="!imageStore.loading">
             <input type="file" accept="image/*" @change="onFileChange" />
             <p class="info-desc" style="color: beige;">메랜 게임 스샷을 넣으면 레벨, 경험치, 메소가 자동입력됩니다.</p>
             <p class="info-desc">드래그, 영역 클릭 후 붙여넣기(Ctrl+V)</p>
         </div>
-        <div v-if="loading" class="loading-text">추출중..</div>
+        <div v-if="imageStore.loading" class="loading-text">추출중..</div>
     </div>
     <div class="hunt-info">
         <div class="level-exp-meso">
@@ -149,7 +127,7 @@ function deleteSelectedItem(id: number) {
         <h3>소비 내역</h3>
         <div v-for="item in selectedItems" :key="item.id" class="hunt-consume-item">
             <img :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon`"
-                style="margin-right: 5px; width: 30px;">
+                style="margin-right: 5px; width: 30px;" alt="아이템이미지">
             <p class="item-name">{{ item.name }}</p>
             <label style="margin-left: 3px; font-weight: 400; width: 30%;">
                 개수:

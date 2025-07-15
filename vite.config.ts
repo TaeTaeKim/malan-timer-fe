@@ -13,7 +13,11 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         "/extract": {
-          target: "http://39.115.66.158:38000", // AI 서버 주소로 변경 가능
+          target: "http://39.115.66.158:38000",
+          changeOrigin: true,
+        },
+        "/timer/image": {
+          target: "http://localhost:8080",
           changeOrigin: true,
         },
       },
