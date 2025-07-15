@@ -314,5 +314,12 @@ const formattedMeso = computed(() => {
         width: 45%;
         font-size: .95rem;
     }
+
+    .level-input,
+    .exp-input,
+    .meso-input,
+    .exp-percent-input {
+        font-size: .75rem;
+    }
 }
 </style>
