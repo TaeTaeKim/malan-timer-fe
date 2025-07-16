@@ -1,18 +1,24 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { hpItems, mpItems, buffItems, etcItems, type Item } from '../data/items';
 import { useConsumeStore } from '../stores/consume';
+import { usePresetStore } from '../stores/preset';
 
 // use store
 const consumeStore = useConsumeStore()
+const presetStore = usePresetStore()
 
 const showModal = ref<boolean>(false);
+const showPresetSaveModal = ref<boolean>(false);
 const search = ref('');
 const tabs = ['hp', 'mp', 'buff', 'etc'];
 const selectedTab = ref<string>(tabs[0]);
+const presetName = ref('');
+const presetNameError = ref('');
 
 function closeModal() {
     showModal.value = false;
+    showPresetSaveModal.value = false;
     search.value = '';
 }
 const itemList = {
@@ -59,6 +65,36 @@ function isSelectedItem(id: number) {
     return selectedItems.value.some(i => i.id === id);
 }
 
+const isPresetNameValid = computed(() => presetName.value.trim().length > 0);
+
+async function handlePresetSaveConfirm() {
+    if (!isPresetNameValid.value) {
+        presetNameError.value = '프리셋 이름을 입력해주세요.';
+        return;
+    }
+    try {
+        await presetStore.savePreset(
+            presetName.value,
+            selectedItems.value.map(item => ({ itemId: item.id, price: item.price }))
+        );
+        await presetStore.fetchPresetList();
+        closeModal();
+        presetName.value = '';
+        presetNameError.value = '';
+    } catch (e) {
+        alert("저장에 실패했습니다. 관리자에게 문의하세요")
+    }
+}
+function handlePresetSaveCancel() {
+    closeModal();
+    presetName.value = '';
+    presetNameError.value = '';
+}
+
+watch(presetName, () => {
+    if (presetNameError.value) presetNameError.value = '';
+});
+
 </script>
 <template>
     <div class="consume-section">
@@ -84,7 +120,7 @@ function isSelectedItem(id: number) {
         <div class="consume-section-botton">
             <button class="consume-add consume-btn" @click="showModal = true">소비 아이템 추가</button>
             <div class="save-reset-btn">
-                <button class="consume-save consume-btn">프리셋 저장</button>
+                <button class="consume-save consume-btn" @click="showPresetSaveModal = true">프리셋 저장</button>
                 <button class="consume-reset consume-btn" @click="consumeStore.clear()">초기화</button>
             </div>
         </div>
@@ -109,6 +145,30 @@ function isSelectedItem(id: number) {
             </div>
             <button class="modal-close" @click="closeModal">닫기</button>
 
+        </div>
+    </div>
+
+    <div v-if="showPresetSaveModal" class="modal-overlay" @click.self="closeModal">
+        <div class="modal-container preset-modal-container">
+            <div class="modal-header preset-modal-header">
+                <label class="preset-modal-label">프리셋 이름</label>
+                <input v-model="presetName" class="preset-modal-input" placeholder="프리셋 이름 입력" />
+                <div v-if="presetNameError" class="preset-modal-error">{{ presetNameError }}</div>
+            </div>
+            <div class="preset-modal-list-title">저장될 아이템 목록</div>
+            <div class="preset-modal-item-list">
+                <div v-for="item in selectedItems" :key="item.id" class="preset-modal-item-row">
+                    <img :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon`"
+                        class="preset-modal-item-img" />
+                    <span class="preset-modal-item-name">{{ item.name }}</span>
+                    <span class="preset-modal-item-price">{{ item.price }}메소</span>
+                </div>
+                <div v-if="selectedItems.length === 0" class="preset-modal-empty">선택된 아이템이 없습니다.</div>
+            </div>
+            <div class="preset-modal-btn-group">
+                <button class="modal-close" @click="handlePresetSaveCancel">취소</button>
+                <button class="modal-close preset-modal-confirm" @click="handlePresetSaveConfirm">확인</button>
+            </div>
         </div>
     </div>
 
@@ -311,6 +371,95 @@ function isSelectedItem(id: number) {
     cursor: pointer;
 }
 
+.preset-modal-container {
+    min-height: unset;
+    min-width: 340px;
+    width: 340px;
+}
+
+.preset-modal-header {
+    margin-bottom: 12px;
+}
+
+.preset-modal-label {
+    font-weight: 700;
+}
+
+.preset-modal-input {
+    width: 100%;
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #484B56;
+    font-size: 16px;
+    background: #343741;
+    color: #fff;
+    box-sizing: border-box;
+}
+
+.preset-modal-list-title {
+    margin: 16px 0 8px 0;
+    font-weight: 700;
+}
+
+.preset-modal-item-list {
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.preset-modal-item-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+}
+
+.preset-modal-item-img {
+    width: 24px;
+}
+
+.preset-modal-item-name {
+    flex: 1;
+}
+
+.preset-modal-item-type,
+.preset-modal-item-count,
+.preset-modal-item-price {
+    font-size: 13px;
+}
+
+.preset-modal-empty {
+    text-align: center;
+    color: #888;
+    padding: 12px;
+}
+
+.preset-modal-btn-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.preset-modal-confirm {
+    background: #2563EB;
+    color: #fff;
+}
+
+.preset-modal-error {
+    color: #ff5a5a;
+    font-size: 14px;
+    margin-top: 4px;
+    margin-bottom: 0;
+    min-height: 18px;
+}
+
+.preset-modal-confirm:disabled,
+.preset-modal-confirm.preset-modal-confirm-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 @media (max-width: 600px) {
     .consume-section {
         width: 94%;
@@ -379,6 +528,26 @@ function isSelectedItem(id: number) {
         font-size: 15px;
         margin: 0;
         padding: 6px 10px;
+    }
+
+    .preset-modal-container {
+        min-width: 90vw !important;
+        max-width: 98vw !important;
+        width: 98vw !important;
+    }
+
+    .preset-modal-input {
+        font-size: 15px;
+        padding: 6px 10px;
+    }
+
+    .preset-modal-item-list {
+        max-height: 30vh !important;
+    }
+
+    .preset-modal-btn-group {
+        flex-direction: column;
+        gap: 6px;
     }
 }
 </style>

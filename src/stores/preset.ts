@@ -7,7 +7,6 @@ interface Preset {
   presetId: number;
 }
 
-// Define PresetItem type for items in a preset (server only returns id, price, type)
 export interface PresetItem {
   itemId: number;
   price: number;
@@ -46,11 +45,24 @@ export const usePresetStore = defineStore("preset", () => {
     return res.data;
   }
 
+  async function savePreset(name: string, items: PresetItem[]) {
+    try {
+      const res = await axios.post("/api/preset", {
+        name,
+        items,
+      });
+      return res.data;
+    } catch (e: any) {
+      throw e;
+    }
+  }
+
   return {
     presetList,
     loading,
     fetchPresetList,
     deletePreset,
     fetchPresetItems,
+    savePreset,
   };
 });
