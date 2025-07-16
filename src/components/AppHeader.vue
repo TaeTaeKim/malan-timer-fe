@@ -10,6 +10,10 @@ const toggleSupport = () => {
 function goToNotifier() {
   window.open('https://malanutil.com/malan-alerter', '_blank');
 }
+
+function redirectToDiscordLogin() {
+  window.location.href = import.meta.env.VITE_DISCORD_LOGIN_URL
+}
 </script>
 
 <template>
@@ -24,11 +28,12 @@ function goToNotifier() {
         <SupportModal :is-open="isSupportOpen" />
       </div>
       <button class="header-button" @click="goToNotifier">메랜지지 알리미</button>
-      <!-- <button class="header-button"
-        style="background-color: #5865f2; display: flex; align-items: center; gap: 5px; border: none;">
+      <button class="header-button"
+        style="background-color: #5865f2; display: flex; align-items: center; gap: 5px; border: none;"
+        @click="redirectToDiscordLogin">
         <span>로그인</span>
         <span><img src="https://cdn.discordapp.com/embed/avatars/0.png" alt="" style="width: 30px;"></span>
-      </button> -->
+      </button>
     </div>
   </header>
 </template>
