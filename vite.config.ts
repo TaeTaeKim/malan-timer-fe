@@ -17,6 +17,10 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
         },
         "/timer/image": {
+          target: "http://localhost:8000",
+          changeOrigin: true,
+        },
+        "/user": {
           target: "http://localhost:8080",
           changeOrigin: true,
         },
