@@ -34,7 +34,7 @@ const authStore = useAuthStore();
         <button class="header-button" @click="goToNotifier">메랜지지 알리미</button>
         <button class="header-button"
           style="background-color: #5865f2; display: flex; align-items: center; gap: 5px; border: none;"
-          @click="!authStore.currentUser && redirectToDiscordLogin">
+          @click="redirectToDiscordLogin">
           <span class="user-name">
             <span v-if="authStore.currentUser">{{ authStore.currentUser.name }}</span>
             <span v-else>로그인</span>
