@@ -2,10 +2,16 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import axios, { HttpStatusCode } from "axios";
 
+interface UserInfo {
+  name: string;
+  avatar: string | null;
+}
+
 export const useAuthStore = defineStore("auth", () => {
   // State
   const accessToken = ref<string | null>(localStorage.getItem("accessToken"));
   const isRefreshing = ref(false);
+  const currentUser = ref<UserInfo | null>(null);
 
   // Getter
   const isAuthenticated = computed(() => !!accessToken.value);
@@ -28,10 +34,11 @@ export const useAuthStore = defineStore("auth", () => {
   async function logout() {
     try {
       // todo : uri 변경
-      await axios.post(`/api/alerter/auth/logout`);
+      await axios.post(`api/alerter/auth/logout`);
     } catch (e) {}
     accessToken.value = null;
     localStorage.removeItem("accessToken");
+    currentUser.value = null;
   }
 
   async function renewToken() {
@@ -46,7 +53,7 @@ export const useAuthStore = defineStore("auth", () => {
       if (!accessToken.value) throw new Error("No tokens");
       const payload = JSON.parse(atob(accessToken.value.split(".")[1]));
       // todo : uri 변경
-      const refreshResponse = await axios.post(`/api/alerter/auth/refresh`, {
+      const refreshResponse = await axios.post(`api/alerter/auth/refresh`, {
         userId: payload.sub,
       });
       if (refreshResponse.status === HttpStatusCode.Ok) {
@@ -65,6 +72,31 @@ export const useAuthStore = defineStore("auth", () => {
     }
   }
 
+  async function getCurrentUserInfo() {
+    try {
+      // todo : uri 변경
+      const res = await axios.get(`user`);
+      currentUser.value = {
+        name: res.data.name,
+        avatar: res.data.avatar,
+      };
+    } catch (e) {
+      currentUser.value = null;
+    }
+  }
+
+  function isAvartar(): boolean {
+    if (currentUser) {
+      if (currentUser.value?.avatar) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
   return {
     accessToken,
     isRefreshing,
@@ -73,5 +105,8 @@ export const useAuthStore = defineStore("auth", () => {
     initialize,
     logout,
     renewToken,
+    currentUser,
+    getCurrentUserInfo,
+    isAvartar,
   };
 });
