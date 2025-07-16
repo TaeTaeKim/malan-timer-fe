@@ -37,7 +37,9 @@ const authStore = useAuthStore();
 onMounted(() => {
     checkAdModal();
     authStore.initialize();
-    authStore.getCurrentUserInfo();
+    if (authStore.isAuthenticated) {
+        authStore.getCurrentUserInfo();
+    }
 });
 
 </script>
