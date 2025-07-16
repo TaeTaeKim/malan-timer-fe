@@ -19,7 +19,7 @@ export const usePresetStore = defineStore("preset", () => {
   async function fetchPresetList() {
     loading.value = true;
     try {
-      const res = await axios.get<Preset[]>("/api/preset");
+      const res = await axios.get<Preset[]>("api/preset");
       presetList.value = res.data;
     } catch (e: any) {
       //  do not anything
@@ -30,7 +30,7 @@ export const usePresetStore = defineStore("preset", () => {
 
   async function deletePreset(presetId: number) {
     try {
-      await axios.delete(`/api/preset/${presetId}`);
+      await axios.delete(`api/preset/${presetId}`);
       presetList.value = presetList.value.filter(
         (p) => p.presetId !== presetId
       );
@@ -41,13 +41,13 @@ export const usePresetStore = defineStore("preset", () => {
 
   // Fetch items for a specific preset
   async function fetchPresetItems(presetId: number): Promise<PresetItem[]> {
-    const res = await axios.get<PresetItem[]>(`/api/preset/${presetId}`);
+    const res = await axios.get<PresetItem[]>(`api/preset/${presetId}`);
     return res.data;
   }
 
   async function savePreset(name: string, items: PresetItem[]) {
     try {
-      const res = await axios.post("/api/preset", {
+      const res = await axios.post("api/preset", {
         name,
         items,
       });
