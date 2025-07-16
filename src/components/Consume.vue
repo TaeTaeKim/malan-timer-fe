@@ -66,6 +66,8 @@ function isSelectedItem(id: number) {
 }
 
 const isPresetNameValid = computed(() => presetName.value.trim().length > 0);
+const MAX_PRESET_COUNT = 5;
+const isPresetLimitReached = computed(() => presetStore.presetList.length >= MAX_PRESET_COUNT);
 
 async function handlePresetSaveConfirm() {
     if (!isPresetNameValid.value) {
@@ -153,7 +155,10 @@ watch(presetName, () => {
             <div class="modal-header preset-modal-header">
                 <label class="preset-modal-label">프리셋 이름</label>
                 <input v-model="presetName" class="preset-modal-input" placeholder="프리셋 이름 입력" />
-                <div v-if="presetNameError" class="preset-modal-error">{{ presetNameError }}</div>
+                <div v-if="presetNameError || isPresetLimitReached" class="preset-modal-error">
+                    <div v-if="presetNameError">{{ presetNameError }}</div>
+                    <div v-if="isPresetLimitReached">최신날짜 기준 5개만 저장됩니다</div>
+                </div>
             </div>
             <div class="preset-modal-list-title">저장될 아이템 목록</div>
             <div class="preset-modal-item-list">
