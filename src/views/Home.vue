@@ -7,6 +7,7 @@ import Timer from '../components/Timer.vue';
 import Consume from '../components/Consume.vue'
 import HuntResult from '../components/HuntResult.vue';
 import { useAuthStore } from '../stores/auth';
+import { usePresetStore } from '../stores/preset';
 
 // Cookie helpers
 function setCookie(name: string, value: string, ttlSeconds: number) {
@@ -33,12 +34,14 @@ function closeAdModal() {
 }
 
 const authStore = useAuthStore();
+const presetStore = usePresetStore();
 
 onMounted(() => {
     checkAdModal();
     authStore.initialize();
     if (authStore.isAuthenticated) {
         authStore.getCurrentUserInfo();
+        presetStore.fetchPresetList();
     }
 });
 

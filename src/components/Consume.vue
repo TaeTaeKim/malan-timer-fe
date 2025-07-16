@@ -3,7 +3,6 @@ import { ref, computed } from 'vue';
 import { hpItems, mpItems, buffItems, etcItems, type Item } from '../data/items';
 import { useConsumeStore } from '../stores/consume';
 
-
 // use store
 const consumeStore = useConsumeStore()
 

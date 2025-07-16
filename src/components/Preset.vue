@@ -1,6 +1,20 @@
 <script setup lang="ts">
 import { ref, type Ref } from 'vue'
+import { usePresetStore } from '../stores/preset'
+import { useConsumeStore } from '../stores/consume';
+
 const activeTab: Ref<'preset' | 'history'> = ref('preset')
+const presetStore = usePresetStore();
+const consumeStore = useConsumeStore();
+
+function handleDelete(presetId: number) {
+    presetStore.deletePreset(presetId);
+}
+
+async function loadPresetItem(presetId: number) {
+    const items = await presetStore.fetchPresetItems(presetId);
+    consumeStore.loadPresetItem(items)
+}
 
 </script>
 <template>
@@ -14,7 +28,20 @@ const activeTab: Ref<'preset' | 'history'> = ref('preset')
             </button>
         </div>
         <div>
-            열심히 개발중입니다🔥
+            <div v-if="activeTab === 'preset'">
+                <div v-for="preset in presetStore.presetList" :key="preset.presetId" class="preset-item">
+                    <span class="preset-name" v-on:click="loadPresetItem(preset.presetId)" style="cursor: pointer;">{{
+                        preset.name }}</span>
+                    <div style="display: flex; gap: 10px;">
+                        <button v-on:click="loadPresetItem(preset.presetId)" style="cursor: pointer;">선택</button>
+                        <button @click="handleDelete(preset.presetId)">삭제</button>
+                    </div>
+
+                </div>
+            </div>
+            <div v-if="activeTab === 'history'">
+                열심히 개발중입니다🔥
+            </div>
         </div>
     </div>
 </template>
@@ -49,6 +76,17 @@ const activeTab: Ref<'preset' | 'history'> = ref('preset')
 
 button:focus {
     outline: none;
+}
+
+.preset-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 0;
+}
+
+.preset-name {
+    font-size: 18px
 }
 
 @media(max-width:600px) {
