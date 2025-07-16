@@ -52,7 +52,6 @@ export const useAuthStore = defineStore("auth", () => {
     try {
       if (!accessToken.value) throw new Error("No tokens");
       const payload = JSON.parse(atob(accessToken.value.split(".")[1]));
-      // todo : uri 변경
       const refreshResponse = await axios.post(`api/alerter/auth/refresh`, {
         userId: payload.sub,
       });
@@ -65,7 +64,6 @@ export const useAuthStore = defineStore("auth", () => {
       }
     } catch (error) {
       console.error("Error occur in refreshing token");
-      //router to root
       logout();
     } finally {
       isRefreshing.value = false;

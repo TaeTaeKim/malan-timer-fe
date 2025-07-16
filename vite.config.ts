@@ -24,6 +24,15 @@ export default defineConfig(({ mode }) => {
           target: "http://localhost:8080",
           changeOrigin: true,
         },
+        "/api": {
+          target: "http://localhost:8080",
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api/, ""),
+        },
+        "/oauth2": {
+          target: "http://localhost:8080",
+          changeOrigin: true,
+        },
       },
     },
   };

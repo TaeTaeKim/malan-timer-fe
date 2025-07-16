@@ -5,6 +5,7 @@ import { createPinia } from "pinia";
 import { createRouter, createWebHistory } from "vue-router";
 import Home from "./views/Home.vue";
 import AuthCallback from "./views/AuthCallback.vue";
+import { setupAxiosInterceptor } from "./axios-interceptor";
 
 const routes = [
   { path: "/", component: Home },
@@ -20,4 +21,5 @@ const app = createApp(App);
 const pinia = createPinia();
 app.use(pinia);
 app.use(router);
+setupAxiosInterceptor();
 app.mount("#app");
