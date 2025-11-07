@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, type Ref } from 'vue'
+import { ref, computed, type Ref, watch, onUnmounted } from 'vue'
 import { useHuntStore } from '../stores/hunt'
 
 // 스토어 사용
@@ -10,8 +10,9 @@ const activeTab: Ref<'timer' | 'stopwatch'> = ref('timer')
 const displayWidth = computed(() => activeTab.value === 'timer' ? '60%' : '100%')
 const alarmAudio = new Audio('alarm-sound.mp3')
 
-// Pin state
-const isPinned: Ref<boolean> = ref(false)
+// Picture-in-Picture state
+let pipWindow: Window | null = null
+const isPipActive: Ref<boolean> = ref(false)
 
 // Time state in seconds
 const time: Ref<number> = ref(0)
@@ -94,34 +95,188 @@ function reset(): void {
   }
 }
 
-// Toggle pin state
-function togglePin(): void {
-  isPinned.value = !isPinned.value
+// Update PiP window content
+function updatePipWindow(): void {
+  if (!pipWindow || pipWindow.closed) return
+
+  const displayEl = pipWindow.document.querySelector('.pip-display')
+  const titleEl = pipWindow.document.querySelector('.pip-title')
+
+  if (displayEl) {
+    displayEl.textContent = displayTime.value
+  }
+  if (titleEl) {
+    titleEl.textContent = activeTab.value === 'timer' ? '타이머' : '스톱워치'
+  }
 }
+
+// Open Picture-in-Picture window
+async function openPip(): Promise<void> {
+  try {
+    // Check if Document PiP API is supported
+    if (!('documentPictureInPicture' in window)) {
+      alert('이 브라우저는 팝업 창 기능을 지원하지 않습니다.\n최신 Chrome/Edge 브라우저를 사용해주세요.')
+      return
+    }
+
+    // @ts-ignore - documentPictureInPicture is not in TypeScript types yet
+    pipWindow = await window.documentPictureInPicture.requestWindow({
+      width: 320,
+      height: 240,
+    })
+
+    if (!pipWindow) return
+
+    isPipActive.value = true
+
+    // Add styles to pip window
+    const style = pipWindow.document.createElement('style')
+    style.textContent = `
+      body {
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(135deg, #1a1d29 0%, #2d3142 100%);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        overflow: hidden;
+      }
+      .pip-container {
+        padding: 16px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .pip-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .pip-title {
+        font-weight: 900;
+        font-size: 14px;
+        color: #FF6239;
+      }
+      .btn-close {
+        background: transparent;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: background 0.2s;
+      }
+      .btn-close:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .pip-display {
+        background-color: #111827;
+        color: #D1D5DB;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+        border: 2px solid rgba(255, 255, 255, 0.05);
+      }
+      .pip-actions {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+      }
+      .btn-pip-action {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: opacity 0.2s, transform 0.1s;
+        font-weight: 500;
+        flex: 1;
+      }
+      .btn-pip-action:active {
+        transform: scale(0.95);
+      }
+      .btn-pip-action:hover {
+        opacity: 0.9;
+      }
+      .btn-start {
+        background-color: green;
+        color: #FFFFFF;
+      }
+      .btn-stop {
+        background-color: red;
+        color: #FFFFFF;
+      }
+      .btn-reset {
+        background-color: #FFFFFF;
+        color: #1A202C;
+        border: 1px solid #CBD5E0;
+      }
+    `
+    pipWindow.document.head.appendChild(style)
+
+    // Add content to pip window
+    const container = pipWindow.document.createElement('div')
+    container.className = 'pip-container'
+    container.innerHTML = `
+      <div class="pip-header">
+        <span class="pip-title">${activeTab.value === 'timer' ? '타이머' : '스톱워치'}</span>
+        <button class="btn-close" id="closeBtn">✕</button>
+      </div>
+      <div class="pip-display">${displayTime.value}</div>
+      <div class="pip-actions">
+        <button class="btn-pip-action btn-start" id="startBtn">시작</button>
+        <button class="btn-pip-action btn-stop" id="stopBtn">정지</button>
+        <button class="btn-pip-action btn-reset" id="resetBtn">리셋</button>
+      </div>
+    `
+    pipWindow.document.body.appendChild(container)
+
+    // Add event listeners to buttons
+    pipWindow.document.getElementById('startBtn')?.addEventListener('click', start)
+    pipWindow.document.getElementById('stopBtn')?.addEventListener('click', stop)
+    pipWindow.document.getElementById('resetBtn')?.addEventListener('click', reset)
+    pipWindow.document.getElementById('closeBtn')?.addEventListener('click', closePip)
+
+    // Listen for window close
+    pipWindow.addEventListener('pagehide', () => {
+      isPipActive.value = false
+      pipWindow = null
+    })
+
+  } catch (error) {
+    console.error('Failed to open Picture-in-Picture window:', error)
+    alert('팝업 창을 열 수 없습니다. 브라우저 설정에서 팝업을 허용해주세요.')
+  }
+}
+
+// Close Picture-in-Picture window
+function closePip(): void {
+  if (pipWindow && !pipWindow.closed) {
+    pipWindow.close()
+  }
+  isPipActive.value = false
+  pipWindow = null
+}
+
+// Watch for changes and update PiP window
+watch([displayTime, activeTab], () => {
+  updatePipWindow()
+})
+
+// Cleanup on component unmount
+onUnmounted(() => {
+  closePip()
+})
 </script>
 
 <template>
-  <!-- Pinned overlay view -->
-  <div v-if="isPinned" class="pinned-overlay">
-    <div class="pinned-container">
-      <div class="pinned-header">
-        <span class="pinned-title">{{ activeTab === 'timer' ? '타이머' : '스톱워치' }}</span>
-        <button class="btn-unpin" @click="togglePin" title="고정 해제">📌</button>
-      </div>
-      <div class="pinned-display">
-        {{ displayTime }}
-      </div>
-      <div class="pinned-actions">
-        <button class="btn-pinned-action btn-start" @click="start">시작</button>
-        <button class="btn-pinned-action btn-stop" @click="stop">정지</button>
-        <button class="btn-pinned-action btn-reset" @click="reset">리셋</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Normal view -->
   <div class="timer-container default-background">
-    <!-- Tabs with Pin Button -->
+    <!-- Tabs with Pop-out Button -->
     <div class="tabs">
       <div class="tabs-buttons">
         <button :class="['tab-button', { active: activeTab === 'timer' }]" @click="activeTimer">
@@ -131,8 +286,13 @@ function togglePin(): void {
           스톱워치
         </button>
       </div>
-      <button class="btn-pin" @click="togglePin" title="상단 고정">
-        📌
+      <button
+        class="btn-pip"
+        @click="isPipActive ? closePip() : openPip()"
+        :title="isPipActive ? '팝업 닫기' : '팝업으로 열기'"
+        :class="{ active: isPipActive }"
+      >
+        🪟
       </button>
     </div>
 
@@ -165,95 +325,6 @@ function togglePin(): void {
 
 
 <style scoped>
-/* Pinned overlay styles */
-.pinned-overlay {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 9999;
-  animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.pinned-container {
-  background: linear-gradient(135deg, #1a1d29 0%, #2d3142 100%);
-  border-radius: 16px;
-  padding: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  min-width: 280px;
-  backdrop-filter: blur(10px);
-}
-
-.pinned-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.pinned-title {
-  font-weight: 900;
-  font-size: 16px;
-  color: #FF6239;
-}
-
-.btn-unpin {
-  background: transparent;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: background 0.2s;
-}
-
-.btn-unpin:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.pinned-display {
-  background-color: #111827;
-  color: #D1D5DB;
-  border-radius: 12px;
-  padding: 20px;
-  text-align: center;
-  font-family: 'Menlo', monospace;
-  font-size: 2.5rem;
-  margin-bottom: 12px;
-  border: 2px solid rgba(255, 255, 255, 0.05);
-}
-
-.pinned-actions {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-}
-
-.btn-pinned-action {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
-  font-weight: 500;
-}
-
-.btn-pinned-action:active {
-  transform: scale(0.95);
-}
-
 .timer-container {
   width: 70%;
   margin-right: 10px;
@@ -290,7 +361,7 @@ function togglePin(): void {
   border-color: #FF6239;
 }
 
-.btn-pin {
+.btn-pip {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
@@ -301,10 +372,16 @@ function togglePin(): void {
   color: white;
 }
 
-.btn-pin:hover {
+.btn-pip:hover {
   background: rgba(255, 98, 57, 0.2);
   border-color: #FF6239;
   transform: scale(1.05);
+}
+
+.btn-pip.active {
+  background: rgba(255, 98, 57, 0.3);
+  border-color: #FF6239;
+  color: #FF6239;
 }
 
 /* display 영역 */
@@ -383,35 +460,13 @@ button:focus {
 }
 
 @media (max-width: 600px) {
-  /* Mobile pinned overlay */
-  .pinned-overlay {
-    top: 10px;
-    right: 10px;
-    left: 10px;
-  }
-
-  .pinned-container {
-    min-width: auto;
-    width: 100%;
-  }
-
-  .pinned-display {
-    font-size: 2rem;
-    padding: 16px;
-  }
-
-  .btn-pinned-action {
-    font-size: 0.8rem;
-    padding: 8px 12px;
-  }
-
   .timer-container {
     margin-bottom: 10px;
     width: 94%;
     padding: 10px 3% 10px 3%;
   }
 
-  .btn-pin {
+  .btn-pip {
     font-size: 16px;
     padding: 4px 10px;
   }
