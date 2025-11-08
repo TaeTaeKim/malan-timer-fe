@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, type Ref } from 'vue'
+import { ref, computed, type Ref, watch, onUnmounted } from 'vue'
 import { useHuntStore } from '../stores/hunt'
 
 // 스토어 사용
@@ -9,6 +9,10 @@ const huntStore = useHuntStore()
 const activeTab: Ref<'timer' | 'stopwatch'> = ref('timer')
 const displayWidth = computed(() => activeTab.value === 'timer' ? '60%' : '100%')
 const alarmAudio = new Audio('alarm-sound.mp3')
+
+// Picture-in-Picture state
+let pipWindow: Window | null = null
+const isPipActive: Ref<boolean> = ref(false)
 
 // Time state in seconds
 const time: Ref<number> = ref(0)
@@ -81,7 +85,7 @@ function stop(): void {
   }
 }
 
-// Reset state 
+// Reset state
 function reset(): void {
   stop()
   time.value = 0
@@ -90,17 +94,208 @@ function reset(): void {
     huntStore.setTimer(0)
   }
 }
+
+// Update PiP window content
+function updatePipWindow(): void {
+  if (!pipWindow || pipWindow.closed) return
+
+  const displayEl = pipWindow.document.querySelector('.pip-display')
+  const titleEl = pipWindow.document.querySelector('.pip-title')
+
+  if (displayEl) {
+    displayEl.textContent = displayTime.value
+  }
+  if (titleEl) {
+    titleEl.textContent = activeTab.value === 'timer' ? '타이머' : '스톱워치'
+  }
+}
+
+// Open Picture-in-Picture window
+async function openPip(): Promise<void> {
+  try {
+    // Check if Document PiP API is supported
+    if (!('documentPictureInPicture' in window)) {
+      alert('이 브라우저는 팝업 창 기능을 지원하지 않습니다.\n최신 Chrome/Edge 브라우저를 사용해주세요.')
+      return
+    }
+
+    // @ts-ignore - documentPictureInPicture is not in TypeScript types yet
+    pipWindow = await window.documentPictureInPicture.requestWindow({
+      width: 320,
+      height: 240,
+    })
+
+    if (!pipWindow) return
+
+    isPipActive.value = true
+
+    // Add styles to pip window
+    const style = pipWindow.document.createElement('style')
+    style.textContent = `
+      body {
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(135deg, #1a1d29 0%, #2d3142 100%);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        overflow: hidden;
+      }
+      .pip-container {
+        padding: 16px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .pip-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .pip-title {
+        font-weight: 900;
+        font-size: 14px;
+        color: #FF6239;
+      }
+      .btn-close {
+        background: transparent;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: background 0.2s;
+      }
+      .btn-close:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .pip-display {
+        background-color: #111827;
+        color: #D1D5DB;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+        border: 2px solid rgba(255, 255, 255, 0.05);
+      }
+      .pip-actions {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+      }
+      .btn-pip-action {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: opacity 0.2s, transform 0.1s;
+        font-weight: 500;
+        flex: 1;
+      }
+      .btn-pip-action:active {
+        transform: scale(0.95);
+      }
+      .btn-pip-action:hover {
+        opacity: 0.9;
+      }
+      .btn-start {
+        background-color: green;
+        color: #FFFFFF;
+      }
+      .btn-stop {
+        background-color: red;
+        color: #FFFFFF;
+      }
+      .btn-reset {
+        background-color: #FFFFFF;
+        color: #1A202C;
+        border: 1px solid #CBD5E0;
+      }
+    `
+    pipWindow.document.head.appendChild(style)
+
+    // Add content to pip window
+    const container = pipWindow.document.createElement('div')
+    container.className = 'pip-container'
+    container.innerHTML = `
+      <div class="pip-header">
+        <span class="pip-title">${activeTab.value === 'timer' ? '타이머' : '스톱워치'}</span>
+        <button class="btn-close" id="closeBtn">✕</button>
+      </div>
+      <div class="pip-display">${displayTime.value}</div>
+      <div class="pip-actions">
+        <button class="btn-pip-action btn-start" id="startBtn">시작</button>
+        <button class="btn-pip-action btn-stop" id="stopBtn">정지</button>
+        <button class="btn-pip-action btn-reset" id="resetBtn">리셋</button>
+      </div>
+    `
+    pipWindow.document.body.appendChild(container)
+
+    // Add event listeners to buttons
+    pipWindow.document.getElementById('startBtn')?.addEventListener('click', start)
+    pipWindow.document.getElementById('stopBtn')?.addEventListener('click', stop)
+    pipWindow.document.getElementById('resetBtn')?.addEventListener('click', reset)
+    pipWindow.document.getElementById('closeBtn')?.addEventListener('click', closePip)
+
+    // Listen for window close
+    pipWindow.addEventListener('pagehide', () => {
+      isPipActive.value = false
+      pipWindow = null
+    })
+
+  } catch (error) {
+    console.error('Failed to open Picture-in-Picture window:', error)
+    alert('팝업 창을 열 수 없습니다. 브라우저 설정에서 팝업을 허용해주세요.')
+  }
+}
+
+// Close Picture-in-Picture window
+function closePip(): void {
+  if (pipWindow && !pipWindow.closed) {
+    pipWindow.close()
+  }
+  isPipActive.value = false
+  pipWindow = null
+}
+
+// Watch for changes and update PiP window
+watch([displayTime, activeTab], () => {
+  updatePipWindow()
+})
+
+// Cleanup on component unmount
+onUnmounted(() => {
+  closePip()
+})
 </script>
 
 <template>
   <div class="timer-container default-background">
-    <!-- Tabs -->
+    <!-- Tabs with Pop-out Button -->
     <div class="tabs">
-      <button :class="['tab-button', { active: activeTab === 'timer' }]" @click="activeTimer">
-        타이머
-      </button>
-      <button :class="['tab-button', { active: activeTab === 'stopwatch' }]" @click="activeStopwatch">
-        스톱워치
+      <div class="tabs-buttons">
+        <button :class="['tab-button', { active: activeTab === 'timer' }]" @click="activeTimer">
+          타이머
+        </button>
+        <button :class="['tab-button', { active: activeTab === 'stopwatch' }]" @click="activeStopwatch">
+          스톱워치
+        </button>
+      </div>
+      <button
+        class="btn-pip"
+        @click="isPipActive ? closePip() : openPip()"
+        :title="isPipActive ? '팝업 닫기' : '팝업으로 열기'"
+        :class="{ active: isPipActive }"
+      >
+      <div class="pip-text-img">
+        <span style="color: black;">PIP 모드</span>
+        <img src="../assets/pip-logo.png" alt="">
+      </div>
       </button>
     </div>
 
@@ -141,8 +336,13 @@ function reset(): void {
 /* tab 영역 */
 .tabs {
   display: flex;
-  border-bottom: 1px solid #E2E8F0;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 24px;
+}
+
+.tabs-buttons {
+  display: flex;
 }
 
 
@@ -161,6 +361,25 @@ function reset(): void {
 .tab-button.active {
   color: #FF6239;
   border-color: #FF6239;
+}
+
+.btn-pip {
+  background: white;
+  border-radius: 10px;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.pip-text-img{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-pip.active {
+  background: #cccccc;
+  
 }
 
 /* display 영역 */
@@ -243,7 +462,11 @@ button:focus {
     margin-bottom: 10px;
     width: 94%;
     padding: 10px 3% 10px 3%;
+  }
 
+  .btn-pip {
+    font-size: 16px;
+    padding: 4px 10px;
   }
 
   .display-contianer {
