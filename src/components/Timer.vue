@@ -292,7 +292,10 @@ onUnmounted(() => {
         :title="isPipActive ? '팝업 닫기' : '팝업으로 열기'"
         :class="{ active: isPipActive }"
       >
-        🪟
+      <div class="pip-text-img">
+        <span style="color: black;">PIP 모드</span>
+        <img src="../assets/pip-logo.png" alt="">
+      </div>
       </button>
     </div>
 
@@ -335,7 +338,6 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #E2E8F0;
   margin-bottom: 24px;
 }
 
@@ -362,26 +364,22 @@ onUnmounted(() => {
 }
 
 .btn-pip {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
+  background: white;
+  border-radius: 10px;
+  border: none;
   padding: 6px 12px;
-  font-size: 18px;
   cursor: pointer;
   transition: all 0.2s;
-  color: white;
 }
-
-.btn-pip:hover {
-  background: rgba(255, 98, 57, 0.2);
-  border-color: #FF6239;
-  transform: scale(1.05);
+.pip-text-img{
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .btn-pip.active {
-  background: rgba(255, 98, 57, 0.3);
-  border-color: #FF6239;
-  color: #FF6239;
+  background: #cccccc;
+  
 }
 
 /* display 영역 */

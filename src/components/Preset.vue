@@ -56,7 +56,6 @@ async function loadPresetItem(presetId: number) {
 
 .tabs {
     display: flex;
-    border-bottom: 1px solid #E2E8F0;
     margin-bottom: 24px;
 }
 
