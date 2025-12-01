@@ -6,10 +6,12 @@ import { createRouter, createWebHistory } from "vue-router";
 import Home from "./views/Home.vue";
 import AuthCallback from "./views/AuthCallback.vue";
 import { setupAxiosInterceptor } from "./axios-interceptor";
+import PrivacyPolicy from "./views/PrivacyPolicy.vue";
 
 const routes = [
   { path: "/", component: Home },
   { path: "/auth/callback", component: AuthCallback },
+  { path: "/privacy-policy", component: PrivacyPolicy}
 ];
 
 const router = createRouter({
