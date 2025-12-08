@@ -4,6 +4,7 @@ import { useConsumeStore } from '../stores/consume';
 import { useHuntStore } from '../stores/hunt';
 import { useImageStore } from '../stores/image';
 import { requiredExp } from '../data/requiredExp';
+import mapleImage from '../assets/mapleimage.png';
 
 const imageUrl = ref<string | null>(null)
 
@@ -177,8 +178,10 @@ const formattedMeso = computed(() => {
     <div class="hunt-consume">
         <h3>소비 내역</h3>
         <div v-for="item in selectedItems" :key="item.id" class="hunt-consume-item">
-            <img :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon`" style="margin-right: 5px; width: 30px;"
-                alt="아이템이미지">
+            <img v-if="item.isCustom" :src="mapleImage" alt="custom item"
+                style="margin-right: 5px; width: 30px;">
+            <img v-else :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon`"
+                style="margin-right: 5px; width: 30px;" alt="아이템이미지">
             <p class="item-name">{{ item.name }}</p>
             <label style="margin-left: 3px; font-weight: 400; width: 30%;">
                 개수:

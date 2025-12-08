@@ -6,6 +6,7 @@ import { hpItems, mpItems, buffItems, etcItems } from "../data/items";
 interface SelectedItem extends Item {
   count: number;
   price: number;
+  isCustom: boolean; // Flag for user-created custom items
 }
 export const useConsumeStore = defineStore("consume", {
   state: () => ({
@@ -14,8 +15,25 @@ export const useConsumeStore = defineStore("consume", {
   actions: {
     addItem(item: Item) {
       if (!this.selectedItems.find((i) => i.id === item.id)) {
-        this.selectedItems.push({ ...item, count: 1, price: item.price });
+        this.selectedItems.push({
+          ...item,
+          count: 1,
+          price: item.price,
+          isCustom: false,
+        });
       }
+    },
+    addCustomItem(itemName: string, price: number) {
+      // Use negative timestamp as unique ID for custom items
+      const customId = -Date.now();
+      this.selectedItems.push({
+        id: customId,
+        name: itemName,
+        type: "custom",
+        price: price,
+        count: 1,
+        isCustom: true,
+      });
     },
     deleteSelectedItem(id: number) {
       this.selectedItems = this.selectedItems.filter((item) => item.id !== id);
@@ -32,13 +50,27 @@ export const useConsumeStore = defineStore("consume", {
       this.clear();
       const allItems = [...hpItems, ...mpItems, ...buffItems, ...etcItems];
       this.selectedItems = presetItemList.reduce((acc, presetItem) => {
-        const item = allItems.find((i) => i.id === presetItem.itemId);
-        if (item) {
+        if (presetItem.isCustom && presetItem.customItemName) {
+          // Handle custom item
           acc.push({
-            ...item,
-            count: 0,
+            id: presetItem.itemId,
+            name: presetItem.customItemName,
+            type: "custom",
             price: presetItem.price,
+            count: 0,
+            isCustom: true,
           });
+        } else {
+          // Handle predefined item
+          const item = allItems.find((i) => i.id === presetItem.itemId);
+          if (item) {
+            acc.push({
+              ...item, // id, name, type, price(override)
+              count: 0,
+              price: presetItem.price,
+              isCustom: false,
+            });
+          }
         }
         return acc;
       }, [] as SelectedItem[]);

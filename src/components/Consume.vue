@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue';
 import { hpItems, mpItems, buffItems, etcItems, type Item } from '../data/items';
 import { useConsumeStore } from '../stores/consume';
 import { usePresetStore } from '../stores/preset';
+import mapleImage from '../assets/mapleimage.png';
 
 // use store
 const consumeStore = useConsumeStore()
@@ -10,16 +11,24 @@ const presetStore = usePresetStore()
 
 const showModal = ref<boolean>(false);
 const showPresetSaveModal = ref<boolean>(false);
+const showCustomItemModal = ref<boolean>(false);
 const search = ref('');
 const tabs = ['hp', 'mp', 'buff', 'etc'];
 const selectedTab = ref<string>(tabs[0]);
 const presetName = ref('');
 const presetNameError = ref('');
+const customItemName = ref('');
+const customItemPrice = ref<number>(0);
+const customItemError = ref('');
 
 function closeModal() {
     showModal.value = false;
     showPresetSaveModal.value = false;
+    showCustomItemModal.value = false;
     search.value = '';
+    customItemName.value = '';
+    customItemPrice.value = 0;
+    customItemError.value = '';
 }
 const itemList = {
     hp: hpItems,
@@ -77,7 +86,12 @@ async function handlePresetSaveConfirm() {
     try {
         await presetStore.savePreset(
             presetName.value,
-            selectedItems.value.map(item => ({ itemId: item.id, price: item.price }))
+            selectedItems.value.map(item => ({
+                itemId: item.id,
+                price: item.price,
+                isCustom: item.isCustom,
+                customItemName: item.isCustom ? item.name : undefined
+            }))
         );
         await presetStore.fetchPresetList();
         closeModal();
@@ -97,6 +111,35 @@ watch(presetName, () => {
     if (presetNameError.value) presetNameError.value = '';
 });
 
+function handleCustomItemAdd() {
+    const trimmedName = customItemName.value.trim();
+
+    if (!trimmedName) {
+        customItemError.value = '아이템 이름을 입력해주세요.';
+        return;
+    }
+
+    // Check if item name already exists in predefined items
+    const allItems = [...hpItems, ...mpItems, ...buffItems, ...etcItems];
+    const isDuplicate = allItems.some(item => item.name === trimmedName);
+    if (isDuplicate) {
+        customItemError.value = '이미 존재하는 아이템입니다. 다른 이름을 사용해주세요.';
+        return;
+    }
+
+    if (customItemPrice.value < 0) {
+        customItemError.value = '가격은 0 이상이어야 합니다.';
+        return;
+    }
+
+    consumeStore.addCustomItem(trimmedName, customItemPrice.value);
+    closeModal();
+}
+
+watch(customItemName, () => {
+    if (customItemError.value) customItemError.value = '';
+});
+
 </script>
 <template>
     <div class="consume-section">
@@ -107,7 +150,9 @@ watch(presetName, () => {
         <div v-else class="consume-list">
             <div v-for="item in selectedItems" :key="item.id" class="consume-list-item">
                 <div class="item-info">
-                    <img :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon?`"
+                    <img v-if="item.isCustom" :src="mapleImage" alt="custom item"
+                        style="margin-right: 10px; width: 30px;">
+                    <img v-else :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon?`"
                         style="margin-right: 10px; width: 30px;">
                     <p style="width:140px">{{ item.name }}</p>
                     <label style="margin-left: 3px; font-weight: 400; width: 30%;">
@@ -121,6 +166,7 @@ watch(presetName, () => {
         </div>
         <div class="consume-section-botton">
             <button class="consume-add consume-btn" @click="showModal = true">소비 아이템 추가</button>
+            <button class="consume-custom-add consume-btn" @click="showCustomItemModal = true">커스텀 아이템 추가</button>
             <div class="save-reset-btn">
                 <button class="consume-save consume-btn" @click="showPresetSaveModal = true">프리셋 저장</button>
                 <button class="consume-reset consume-btn" @click="consumeStore.clear()">초기화</button>
@@ -128,6 +174,7 @@ watch(presetName, () => {
         </div>
     </div>
 
+    <!-- 소비 아이템 선택 모달 -->
     <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
         <div class="modal-container">
             <div class="modal-header">
@@ -150,6 +197,7 @@ watch(presetName, () => {
         </div>
     </div>
 
+    <!--  프리셋 저장 모달 -->
     <div v-if="showPresetSaveModal" class="modal-overlay" @click.self="closeModal">
         <div class="modal-container preset-modal-container">
             <div class="modal-header preset-modal-header">
@@ -163,7 +211,9 @@ watch(presetName, () => {
             <div class="preset-modal-list-title">저장될 아이템 목록</div>
             <div class="preset-modal-item-list">
                 <div v-for="item in selectedItems" :key="item.id" class="preset-modal-item-row">
-                    <img :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon`"
+                    <img v-if="item.isCustom" :src="mapleImage" alt="custom item"
+                        class="preset-modal-item-img" />
+                    <img v-else :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon`"
                         class="preset-modal-item-img" />
                     <span class="preset-modal-item-name">{{ item.name }}</span>
                     <span class="preset-modal-item-price">{{ item.price }}메소</span>
@@ -173,6 +223,27 @@ watch(presetName, () => {
             <div class="preset-modal-btn-group">
                 <button class="modal-close" @click="handlePresetSaveCancel">취소</button>
                 <button class="modal-close preset-modal-confirm" @click="handlePresetSaveConfirm">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 커스텀 아이템 추가 모달 -->
+    <div v-if="showCustomItemModal" class="modal-overlay" @click.self="closeModal">
+        <div class="modal-container preset-modal-container">
+            <div class="modal-header preset-modal-header">
+                <label class="preset-modal-label">커스텀 아이템 추가</label>
+                <input v-model="customItemName" class="preset-modal-input" placeholder="아이템 이름 입력"
+                    style="margin-top: 8px; margin-bottom: 12px;" />
+                <label class="preset-modal-label">가격</label>
+                <input v-model.number="customItemPrice" type="number" min="0" class="preset-modal-input"
+                    placeholder="가격 입력" style="margin-top: 8px;" />
+                <div v-if="customItemError" class="preset-modal-error">
+                    {{ customItemError }}
+                </div>
+            </div>
+            <div class="preset-modal-btn-group">
+                <button class="modal-close" @click="closeModal">취소</button>
+                <button class="modal-close preset-modal-confirm" @click="handleCustomItemAdd">추가</button>
             </div>
         </div>
     </div>
@@ -243,7 +314,8 @@ watch(presetName, () => {
     background: #515972;
 }
 
-.consume-add {
+.consume-add,
+.consume-custom-add {
     width: 20%;
 }
 
@@ -502,6 +574,7 @@ watch(presetName, () => {
     }
 
     .consume-add,
+    .consume-custom-add,
     .consume-save,
     .consume-reset {
         width: 100% !important;
