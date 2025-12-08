@@ -79,13 +79,21 @@ const MAX_PRESET_COUNT = 5;
 const isPresetLimitReached = computed(() => presetStore.presetList.length >= MAX_PRESET_COUNT);
 
 async function handlePresetSaveConfirm() {
-    if (!isPresetNameValid.value) {
+    const trimmedPresetName = presetName.value.trim();
+
+    if (!trimmedPresetName) {
         presetNameError.value = '프리셋 이름을 입력해주세요.';
         return;
     }
+
+    if (trimmedPresetName.length > 10) {
+        presetNameError.value = '프리셋 이름은 최대 10자까지 입력 가능합니다.';
+        return;
+    }
+
     try {
         await presetStore.savePreset(
-            presetName.value,
+            trimmedPresetName,
             selectedItems.value.map(item => ({
                 itemId: item.id,
                 price: item.price,
@@ -116,6 +124,11 @@ function handleCustomItemAdd() {
 
     if (!trimmedName) {
         customItemError.value = '아이템 이름을 입력해주세요.';
+        return;
+    }
+
+    if (trimmedName.length > 10) {
+        customItemError.value = '아이템 이름은 최대 10자까지 입력 가능합니다.';
         return;
     }
 
@@ -150,16 +163,18 @@ watch(customItemName, () => {
         <div v-else class="consume-list">
             <div v-for="item in selectedItems" :key="item.id" class="consume-list-item">
                 <div class="item-info">
-                    <img v-if="item.isCustom" :src="mapleImage" alt="custom item"
-                        style="margin-right: 10px; width: 30px;">
-                    <img v-else :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon?`"
-                        style="margin-right: 10px; width: 30px;">
-                    <p style="width:140px">{{ item.name }}</p>
-                    <label style="margin-left: 3px; font-weight: 400; width: 30%;">
-                        가격:
-                        <input type="number" v-model.number="item.price" min="0" style="width: 50%;margin-left: 1px;">
-                    </label>
-                    <button @click="deleteSelectedItem(item.id)">×</button>
+                    <div class="item-left">
+                        <img v-if="item.isCustom" :src="mapleImage" alt="custom item" class="item-icon">
+                        <img v-else :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon?`" class="item-icon">
+                        <p class="item-name-text">{{ item.name }}</p>
+                    </div>
+                    <div class="item-right">
+                        <div class="price-input-wrapper">
+                            <input type="number" v-model.number="item.price" min="0" class="price-input">
+                            <span class="input-suffix">메소</span>
+                        </div>
+                        <button @click="deleteSelectedItem(item.id)">×</button>
+                    </div>
                 </div>
             </div>
 
@@ -206,7 +221,8 @@ watch(customItemName, () => {
         <div class="modal-container preset-modal-container">
             <div class="modal-header preset-modal-header">
                 <label class="preset-modal-label">프리셋 이름</label>
-                <input v-model="presetName" class="preset-modal-input" placeholder="프리셋 이름 입력" />
+                <input v-model="presetName" class="preset-modal-input" placeholder="프리셋 이름 입력 (최대 10자)"
+                    maxlength="10" />
                 <div v-if="presetNameError || isPresetLimitReached" class="preset-modal-error">
                     <div v-if="presetNameError">{{ presetNameError }}</div>
                     <div v-if="isPresetLimitReached">최신날짜 기준 5개만 저장됩니다</div>
@@ -235,8 +251,8 @@ watch(customItemName, () => {
         <div class="modal-container preset-modal-container">
             <div class="modal-header preset-modal-header">
                 <label class="preset-modal-label">커스텀 아이템 추가</label>
-                <input v-model="customItemName" class="preset-modal-input" placeholder="아이템 이름 입력"
-                    style="margin-top: 8px; margin-bottom: 12px;" />
+                <input v-model="customItemName" class="preset-modal-input" placeholder="아이템 이름 입력 (최대 10자)"
+                    maxlength="10" style="margin-top: 8px; margin-bottom: 12px;" />
                 <label class="preset-modal-label">가격</label>
                 <input v-model.number="customItemPrice" type="number" min="0" class="preset-modal-input"
                     placeholder="가격 입력" style="margin-top: 8px;" />
@@ -288,9 +304,50 @@ watch(customItemName, () => {
 .item-info {
     display: flex;
     align-items: center;
-    gap: 5px;
+    justify-content: space-between;
     height: 100%;
     width: 100%;
+}
+
+.item-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.item-icon {
+    width: 30px;
+    height: 30px;
+}
+
+.item-name-text {
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+}
+
+.item-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.price-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.price-input {
+    width: 80px;
+}
+
+.input-suffix {
+    font-weight: 700;
+    font-size: 14px;
+    color: #eab308;
 }
 
 .consume-title {
@@ -572,6 +629,20 @@ watch(customItemName, () => {
         grid-template-columns: 1fr !important;
         height: auto;
         column-gap: 0;
+    }
+
+    .item-name-text {
+        max-width: 120px;
+        font-size: 13px;
+    }
+
+    .price-input {
+        width: 60px;
+        font-size: 13px;
+    }
+
+    .input-suffix {
+        font-size: 12px;
     }
 
     .consume-section-botton {

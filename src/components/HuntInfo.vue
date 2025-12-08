@@ -145,8 +145,8 @@ const formattedMeso = computed(() => {
     <div class="image-dropbox" @drop="onDrop" @dragover.prevent @paste="onPaste" tabindex="0">
         <div v-if="!imageStore.loading">
             <input type="file" accept="image/*" @change="onFileChange" />
-            <p class="info-desc" style="color: beige;">메랜 게임 스샷을 넣으면 레벨, 경험치, 메소가 자동입력됩니다.</p>
-            <p class="info-desc">드래그, 영역 클릭 후 붙여넣기(Ctrl+V)</p>
+            <p class="info-desc" style="color: beige;">게임 스샷을 넣으면 레벨, 경험치, 메소가 자동입력됩니다.</p>
+            <p class="info-desc">드래그 혹은 영역 클릭 후 붙여넣기(Ctrl+V)</p>
         </div>
         <div v-if="imageStore.loading" class="loading-text">추출중..</div>
     </div>
@@ -178,16 +178,15 @@ const formattedMeso = computed(() => {
     <div class="hunt-consume">
         <h3>소비 내역</h3>
         <div v-for="item in selectedItems" :key="item.id" class="hunt-consume-item">
-            <img v-if="item.isCustom" :src="mapleImage" alt="custom item"
-                style="margin-right: 5px; width: 30px;">
+            <img v-if="item.isCustom" :src="mapleImage" alt="custom item" style="margin-right: 5px; width: 30px;">
             <img v-else :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon`"
                 style="margin-right: 5px; width: 30px;" alt="아이템이미지">
             <p class="item-name">{{ item.name }}</p>
-            <label style="margin-left: 3px; font-weight: 400; width: 30%;">
-                개수:
-                <input type="number" min="0" style="width: 50%;margin-left: 1px;" :value="quantities[item.id] || 0"
+            <div class="quantity-input-wrapper">
+                <input type="number" min="0" class="quantity-input" :value="quantities[item.id] || 0"
                     @input="updateQuantity(item.id, +(($event.target as HTMLInputElement)?.value || 0))">
-            </label>
+                <span class="input-suffix">개</span>
+            </div>
             <button @click="deleteSelectedItem(item.id)">×</button>
         </div>
     </div>
@@ -281,6 +280,23 @@ const formattedMeso = computed(() => {
     align-items: center;
     justify-content: space-between;
     height: 35px;
+}
+
+.quantity-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: 30%;
+}
+
+.quantity-input {
+    width: 60%;
+}
+
+.input-suffix {
+    font-weight: 700;
+    font-size: 14px;
+    color: white;
 }
 
 .loading-text {
