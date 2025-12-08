@@ -57,6 +57,56 @@ button {
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 } */
+
+/* Standardized input styling for consistency across browsers */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="file"] {
+  background-color: #343741;
+  color: #fff;
+  border: 1px solid #484B56;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 14px;
+  transition: border-color 0.2s, background-color 0.2s;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="search"]:focus {
+  outline: none;
+  border-color: #2563EB;
+  background-color: #3d4049;
+}
+
+input[type="text"]:disabled,
+input[type="number"]:disabled,
+input[type="email"]:disabled,
+input[type="password"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Number input arrows (Chrome, Safari, Edge) */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  opacity: 0.7;
+}
+
+/* Number input arrows (Firefox) */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
 h2 {
   margin: 0;
 }

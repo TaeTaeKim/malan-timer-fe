@@ -166,7 +166,6 @@ watch(customItemName, () => {
         </div>
         <div class="consume-section-botton">
             <button class="consume-add consume-btn" @click="showModal = true">소비 아이템 추가</button>
-            <button class="consume-custom-add consume-btn" @click="showCustomItemModal = true">커스텀 아이템 추가</button>
             <div class="save-reset-btn">
                 <button class="consume-save consume-btn" @click="showPresetSaveModal = true">프리셋 저장</button>
                 <button class="consume-reset consume-btn" @click="consumeStore.clear()">초기화</button>
@@ -192,7 +191,12 @@ watch(customItemName, () => {
                     {{ item.name }}
                 </div>
             </div>
-            <button class="modal-close" @click="closeModal">닫기</button>
+            <div class="modal-footer">
+                <button class="modal-custom-add-btn" @click="showModal = false; showCustomItemModal = true">
+                    찾는 아이템이 없으신가요?
+                </button>
+                <button class="modal-close" @click="closeModal">닫기</button>
+            </div>
 
         </div>
     </div>
@@ -211,8 +215,7 @@ watch(customItemName, () => {
             <div class="preset-modal-list-title">저장될 아이템 목록</div>
             <div class="preset-modal-item-list">
                 <div v-for="item in selectedItems" :key="item.id" class="preset-modal-item-row">
-                    <img v-if="item.isCustom" :src="mapleImage" alt="custom item"
-                        class="preset-modal-item-img" />
+                    <img v-if="item.isCustom" :src="mapleImage" alt="custom item" class="preset-modal-item-img" />
                     <img v-else :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon`"
                         class="preset-modal-item-img" />
                     <span class="preset-modal-item-name">{{ item.name }}</span>
@@ -314,8 +317,7 @@ watch(customItemName, () => {
     background: #515972;
 }
 
-.consume-add,
-.consume-custom-add {
+.consume-add {
     width: 20%;
 }
 
@@ -436,9 +438,28 @@ watch(customItemName, () => {
     background: #484B56;
 }
 
-.modal-close {
-    align-self: flex-end;
+.modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-top: 8px;
+}
+
+.modal-custom-add-btn {
+    padding: 6px 16px;
+    border-radius: 6px;
+    border: none;
+    background: #2563EB;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.modal-custom-add-btn:hover {
+    background: #1d4ed8;
+}
+
+.modal-close {
     padding: 6px 16px;
     border-radius: 6px;
     border: none;
@@ -574,7 +595,6 @@ watch(customItemName, () => {
     }
 
     .consume-add,
-    .consume-custom-add,
     .consume-save,
     .consume-reset {
         width: 100% !important;
@@ -600,6 +620,16 @@ watch(customItemName, () => {
     .modal-list {
         max-height: 70vh !important;
         margin-bottom: 7px;
+    }
+
+    .modal-footer {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .modal-custom-add-btn {
+        font-size: 13px;
+        padding: 6px 10px;
     }
 
     .modal-close {
