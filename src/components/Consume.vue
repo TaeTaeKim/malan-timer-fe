@@ -173,7 +173,7 @@ watch(customItemName, () => {
                             <input type="number" v-model.number="item.price" min="0" class="price-input">
                             <span class="input-suffix">메소</span>
                         </div>
-                        <button @click="deleteSelectedItem(item.id)">×</button>
+                        <button class='x-button' @click="deleteSelectedItem(item.id)">×</button>
                     </div>
                 </div>
             </div>

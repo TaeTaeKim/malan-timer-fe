@@ -187,7 +187,7 @@ const formattedMeso = computed(() => {
                     @input="updateQuantity(item.id, +(($event.target as HTMLInputElement)?.value || 0))">
                 <span class="input-suffix">개</span>
             </div>
-            <button @click="deleteSelectedItem(item.id)">×</button>
+            <button class='x-button' @click="deleteSelectedItem(item.id)">×</button>
         </div>
     </div>
 
