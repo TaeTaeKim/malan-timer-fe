@@ -221,11 +221,11 @@ const formattedMeso = computed(() => {
 }
 
 .level {
-    width: 20%;
+    width: 25%;
 }
 
 .exp {
-    width: 75%;
+    width: 70%;
 }
 
 .meso {
@@ -271,7 +271,7 @@ const formattedMeso = computed(() => {
 /* level exp title font */
 .level-title,
 .exp-title {
-    font-size: 20px;
+    font-size: 17px;
     font-weight: 900;
 }
 
