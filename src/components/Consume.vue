@@ -74,7 +74,6 @@ function isSelectedItem(id: number) {
     return selectedItems.value.some(i => i.id === id);
 }
 
-const isPresetNameValid = computed(() => presetName.value.trim().length > 0);
 const MAX_PRESET_COUNT = 5;
 const isPresetLimitReached = computed(() => presetStore.presetList.length >= MAX_PRESET_COUNT);
 
