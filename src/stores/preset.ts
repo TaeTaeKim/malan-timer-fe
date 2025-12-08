@@ -10,6 +10,8 @@ interface Preset {
 export interface PresetItem {
   itemId: number;
   price: number;
+  isCustom?: boolean; // Flag for custom items
+  customItemName?: string; // Name for custom items
 }
 
 export const usePresetStore = defineStore("preset", () => {

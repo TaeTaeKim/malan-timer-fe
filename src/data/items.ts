@@ -5,7 +5,7 @@ export interface Item {
   type: ItemType;
 }
 
-export type ItemType = "hp" | "mp" | "buff" | "etc";
+export type ItemType = "hp" | "mp" | "buff" | "etc" | "custom";
 
 export const hpItems: Item[] = [
   { name: "빨강포션", id: 2000000, price: 150, type: "hp" },

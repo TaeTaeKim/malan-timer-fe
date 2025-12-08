@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 import { useConsumeStore } from '../stores/consume';
 import { useHuntStore } from '../stores/hunt';
 import { requiredExp } from '../data/requiredExp';
+import mapleImage from '../assets/mapleimage.png';
 
 const consumeStore = useConsumeStore()
 const huntStore = useHuntStore()
@@ -131,7 +132,9 @@ function cancelEditTime() {
                 <p>소비 가격</p>
                 <div class="result-consume-list" style="padding-bottom: 10px;">
                     <div v-for="item in usedConsumables" class="result-consume-item">
-                        <img :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon`"
+                        <img v-if="item.isCustom" :src="mapleImage" alt="custom item"
+                            style="margin-right: 5px; width: 30px;">
+                        <img v-else :src="`https://maplestory.io/api/GMS/255/item/${item.id}/icon`"
                             style="margin-right: 5px; width: 30px;">
                         <span style="width: 30%;">{{ item.name }}</span>
                         <span style="margin-right: 10px; width: 25%;">사용 개수 : {{ item.used }}</span>
