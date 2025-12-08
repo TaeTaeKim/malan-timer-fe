@@ -16,6 +16,8 @@ export const hpItems: Item[] = [
   { name: "장어구이", id: 2022003, price: 1100, type: "hp" },
   { name: "키노코라면(구운돼지)", id: 2022018, price: 1600, type: "hp" },
   { name: "쭈쭈바", id: 2001001, price: 2185, type: "hp" },
+  { name: "햄버거", id: 2020004, price: 450, type: "hp" },
+  { name: "뚱뚱이 핫도그", id: 2020006, price: 530, type: "hp" },
   { name: "살살녹는 치즈", id: 2020012, price: 4500, type: "hp" },
   { name: "순록의 우유", id: 2020013, price: 5600, type: "hp" },
   { name: "엘릭서", id: 2000004, price: 0, type: "hp" },
@@ -37,7 +39,9 @@ export const mpItems: Item[] = [
   { name: "새벽의 이슬", id: 2020014, price: 8100, type: "mp" },
   { name: "황혼의 이슬", id: 2020015, price: 10200, type: "mp" },
   { name: "엘릭서", id: 2000004, price: 0, type: "mp" },
+  { name: "인삼 원액", id: 2002022, price: 10000, type: "mp" },
   { name: "파워 엘릭서", id: 2000005, price: 0, type: "mp" },
+  { name: "진저 에일", id: 2002023, price: 18750, type: "mp" },
   { name: "파란포션 알약", id: 2000010, price: 200, type: "mp" },
   { name: "마나엘릭서 알약", id: 2000011, price: 620, type: "mp" },
 ];
